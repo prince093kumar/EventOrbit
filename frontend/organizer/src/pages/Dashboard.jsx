@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { TrendingUp, Calendar, DollarSign, Clock, Ticket } from 'lucide-react';
 
 const StatCard = ({ title, value, change, icon: Icon, color }) => (
@@ -20,6 +21,7 @@ const StatCard = ({ title, value, change, icon: Icon, color }) => (
 );
 
 const Dashboard = () => {
+    const { user, token, isAuthenticated } = useAuth();
     const [stats, setStats] = useState({
         totalSales: 0,
         ticketsSold: 0,
@@ -28,23 +30,40 @@ const Dashboard = () => {
     });
     const [loading, setLoading] = useState(true);
 
+    const [activities, setActivities] = useState([]);
+
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchStatsAndActivity = async () => {
+            if (!isAuthenticated) {
+                // Guest Mode setup (kept same)
+                setLoading(false);
+                return;
+            }
+
             try {
-                const res = await fetch('http://localhost:5000/api/organizer/stats');
-                const data = await res.json();
-                if (data.success) {
-                    setStats(data);
-                }
+                // Fetch Stats
+                const statsRes = await fetch('http://localhost:5000/api/organizer/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const statsData = await statsRes.json();
+                if (statsData.success) setStats(statsData);
+
+                // Fetch Recent Activity
+                const activityRes = await fetch('http://localhost:5000/api/organizer/live-activity', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const activityData = await activityRes.json();
+                if (activityData.success) setActivities(activityData.activities);
+
             } catch (error) {
-                console.error("Error fetching dashboard stats:", error);
+                console.error("Error fetching dashboard data:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchStats();
-    }, []);
+        fetchStatsAndActivity();
+    }, [isAuthenticated, token]);
 
     return (
         <div className="space-y-6">
@@ -54,43 +73,41 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard
-                    title="Total Sales"
-                    value={`₹${stats.totalSales.toLocaleString()}`}
-                    change="+20.1%"
-                    icon={DollarSign}
-                    color="bg-gradient-to-br from-green-400 to-emerald-600"
-                />
-                <StatCard
-                    title="Tickets Sold"
-                    value={stats.ticketsSold}
-                    change="+12.5%"
-                    icon={Ticket}
-                    color="bg-gradient-to-br from-blue-400 to-indigo-600"
-                />
-                <StatCard
-                    title="Events Active"
-                    value={stats.eventsActive}
-                    change="Active"
-                    icon={Calendar}
-                    color="bg-gradient-to-br from-purple-400 to-pink-600"
-                />
-                <StatCard
-                    title="Pending Approval"
-                    value={stats.pendingApproval}
-                    change="Waiting"
-                    icon={Clock}
-                    color="bg-gradient-to-br from-yellow-400 to-orange-500"
-                />
+                <StatCard title="Total Sales" value={`₹${stats.totalSales.toLocaleString()}`} change="+20.1%" icon={DollarSign} color="bg-gradient-to-br from-green-400 to-emerald-600" />
+                <StatCard title="Tickets Sold" value={stats.ticketsSold} change="+12.5%" icon={Ticket} color="bg-gradient-to-br from-blue-400 to-indigo-600" />
+                <StatCard title="Events Active" value={stats.eventsActive} change="Active" icon={Calendar} color="bg-gradient-to-br from-purple-400 to-pink-600" />
+                <StatCard title="Pending Approval" value={stats.pendingApproval} change="Waiting" icon={Clock} color="bg-gradient-to-br from-yellow-400 to-orange-500" />
             </div>
 
-            {/* Recent Activity Placeholder from Wireframe */}
+            {/* Recent Activity */}
             <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden">
                 <div className="px-6 py-4 border-b border-[var(--border-color)]">
                     <h3 className="font-bold text-[var(--text-page)]">Recent Activity</h3>
                 </div>
-                <div className="p-6 text-[var(--text-muted)] text-center text-sm">
-                    {loading ? 'Loading stats...' : 'No recent notifications.'}
+                <div className="divide-y divide-[var(--border-color)]">
+                    {loading ? (
+                        <div className="p-6 text-center text-[var(--text-muted)]">Loading activity...</div>
+                    ) : activities.length > 0 ? (
+                        activities.slice(0, 5).map((item) => (
+                            <div key={item.id} className="px-6 py-4 flex items-center justify-between hover:bg-[var(--bg-subtle)] transition-colors">
+                                <div>
+                                    <p className="text-sm font-medium text-[var(--text-page)]">
+                                        {item.action} for <span className="font-bold">{item.eventName}</span>
+                                    </p>
+                                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                                        {item.user} • {new Date(item.time).toLocaleTimeString()}
+                                    </p>
+                                </div>
+                                <span className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-page)] px-2 py-1 rounded border border-[var(--border-color)]">
+                                    {new Date(item.time).toLocaleDateString()}
+                                </span>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="p-6 text-[var(--text-muted)] text-center text-sm">
+                            No recent activity found. Sales and check-ins will appear here.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

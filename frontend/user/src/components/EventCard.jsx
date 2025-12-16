@@ -42,7 +42,9 @@ const EventCard = ({ id, title, organizer, date, imageColor, price, location, ca
           <div className="pt-4 border-t border-[var(--border-color)] flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-xs text-[var(--text-muted)]">Starting from</span>
-              <span className="text-lg font-bold text-[var(--text-page)]">{price}</span>
+              <span className="text-lg font-bold text-[var(--text-page)]">
+                {typeof price === 'object' ? `₹${price.General || 0}` : `₹${price}`}
+              </span>
             </div>
             <button
               onClick={handleBook}

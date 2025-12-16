@@ -4,7 +4,7 @@ import { LayoutDashboard, CalendarPlus, Activity, Users, DollarSign, UserCheck, 
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
-    const { logout } = useAuth();
+    const { logout, isAuthenticated } = useAuth();
 
     const navItems = [
         { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -46,13 +46,23 @@ const Sidebar = () => {
 
             {/* User / Logout */}
             <div className="p-4 border-t border-[var(--border-color)]">
-                <button
-                    onClick={logout}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors font-medium"
-                >
-                    <LogOut size={20} />
-                    <span>Sign Out</span>
-                </button>
+                {isAuthenticated ? (
+                    <button
+                        onClick={logout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors font-medium"
+                    >
+                        <LogOut size={20} />
+                        <span>Sign Out</span>
+                    </button>
+                ) : (
+                    <NavLink
+                        to="/login"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/10 rounded-xl transition-colors font-medium"
+                    >
+                        <LogOut size={20} className="rotate-180" />
+                        <span>Sign In</span>
+                    </NavLink>
+                )}
             </div>
         </aside>
     );

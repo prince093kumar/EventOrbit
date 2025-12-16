@@ -3,7 +3,7 @@ import apiClient from "./apiClient";
 export const fetchEvents = async () => {
   try {
     const response = await apiClient.get("/events");
-    return response.data;
+    return response.data.events || [];
   } catch (error) {
     console.error("Failed to fetch events from backend", error);
     return [];

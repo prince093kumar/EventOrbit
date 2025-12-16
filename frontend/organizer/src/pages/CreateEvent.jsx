@@ -84,11 +84,17 @@ const CreateEvent = () => {
                 price: { General: 50 }, // Default price for now
             };
 
+            const token = localStorage.getItem('eventorbit_organizer_token');
+            if (!token) {
+                alert("You are not logged in!");
+                return;
+            }
+
             const response = await fetch('http://localhost:5000/api/events', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // 'Authorization': `Bearer ${token}` // Add token when Auth is real
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(payload)
             });

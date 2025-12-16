@@ -6,7 +6,16 @@ import { useAuth } from '../context/AuthContext';
 
 const TopBar = ({ toggleSidebar }) => {
     const { isDarkMode, toggleTheme } = useTheme();
-    const { user, logout } = useAuth();
+    const { user, logout, isAuthenticated } = useAuth();
+    const [showNotifications, setShowNotifications] = useState(false);
+
+    // Dummy Notifications
+    const notifications = [
+        { id: 1, text: "New ticket sold for 'Tech Submit 2025'", time: "2 min ago", unread: true },
+        { id: 2, text: "Event 'Jazz Night' was approved", time: "1 hr ago", unread: false },
+        { id: 3, text: "Payout of ₹45,000 processed", time: "1 day ago", unread: false },
+    ];
+
     const [searchQuery, setSearchQuery] = useState('');
 
     const navItems = [
@@ -20,6 +29,7 @@ const TopBar = ({ toggleSidebar }) => {
 
     return (
         <header className="h-20 bg-[var(--bg-page)]/90 backdrop-blur-md border-b border-[var(--border-color)] sticky top-0 z-50 px-6 flex items-center gap-6 transition-all flex-shrink-0">
+
 
             {/* Logo Section */}
             <div className="flex items-center gap-2 min-w-fit">
@@ -67,29 +77,64 @@ const TopBar = ({ toggleSidebar }) => {
                     />
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 relative">
                     <button onClick={toggleTheme} className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] rounded-full transition-colors">
                         {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
 
-                    <button className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] rounded-full transition-colors relative">
-                        <Bell size={20} />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[var(--bg-page)]"></span>
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] rounded-full transition-colors relative"
+                        >
+                            <Bell size={20} />
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[var(--bg-page)]"></span>
+                        </button>
 
-                    <button onClick={logout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors" title="Sign Out">
-                        <LogOut size={20} />
-                    </button>
+                        {/* Notifications Dropdown */}
+                        {showNotifications && (
+                            <div className="absolute right-0 mt-2 w-80 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="px-4 py-2 border-b border-[var(--border-color)] flex justify-between items-center">
+                                    <span className="font-bold text-sm text-[var(--text-page)]">Notifications</span>
+                                    <span className="text-xs text-[#FFDA8A] cursor-pointer hover:underline">Mark all read</span>
+                                </div>
+                                <div className="max-h-64 overflow-y-auto">
+                                    {notifications.map(n => (
+                                        <div key={n.id} className={`px-4 py-3 hover:bg-[var(--bg-subtle)] border-b border-[var(--border-color)] last:border-0 cursor-pointer ${n.unread ? 'bg-[#FFDA8A]/5' : ''}`}>
+                                            <p className={`text-sm ${n.unread ? 'font-semibold text-[var(--text-page)]' : 'text-[var(--text-muted)]'}`}>{n.text}</p>
+                                            <p className="text-xs text-gray-400 mt-1">{n.time}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="px-4 py-2 border-t border-[var(--border-color)] text-center">
+                                    <span className="text-xs font-medium text-[var(--text-muted)] cursor-pointer hover:text-[var(--text-page)]">View all notifications</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Auth Action */}
+                    {isAuthenticated ? (
+                        <button onClick={logout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors" title="Sign Out">
+                            <LogOut size={20} />
+                        </button>
+                    ) : (
+                        <Link to="/login" className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/10 rounded-full transition-colors" title="Sign In">
+                            <LogOut size={20} className="rotate-180" /> {/* Flip icon or use Login icon */}
+                        </Link>
+                    )}
                 </div>
 
                 {/* Profile Avatar */}
                 <div className="hidden sm:flex items-center gap-3 border-l border-[var(--border-color)] pl-4">
                     <div className="text-right">
-                        <p className="text-xs font-bold text-[var(--text-page)]">{user?.name || 'Organizer'}</p>
-                        <p className="text-[10px] text-[var(--text-muted)]">Admin</p>
+                        <p className="text-xs font-bold text-[var(--text-page)]">
+                            {isAuthenticated ? (user?.fullName || 'Organizer') : 'Guest User'}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-muted)]">{isAuthenticated ? 'Organizer' : 'Read Only'}</p>
                     </div>
                     <div className="w-9 h-9 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                        {user?.name?.charAt(0) || 'O'}
+                        {isAuthenticated ? (user?.fullName?.charAt(0) || 'O') : 'G'}
                     </div>
                 </div>
             </div>

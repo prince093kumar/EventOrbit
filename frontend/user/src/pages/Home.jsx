@@ -123,7 +123,7 @@ const Home = () => {
                 id={event.id}
                 title={event.title}
                 organizer={event.organizer}
-                date={event.date}
+                date={new Date(event.date).toLocaleDateString()}
                 imageColor={event.imageColor}
                 price={event.price}
                 category={event.category}

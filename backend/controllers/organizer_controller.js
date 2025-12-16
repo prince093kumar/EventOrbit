@@ -7,7 +7,11 @@ import Booking from "../models/booking_model.js";
 // @access  Private
 export const getDashboardStats = async (req, res) => {
     try {
-        const userId = req.user ? req.user._id : "6753457a1234567890abcdef"; // Fallback for dev
+        // Check if user is authenticated (middleware should ensure this)
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+        const userId = req.user._id;
 
         // 1. Total Sales (from Bookings)
         // Find all events by this organizer
@@ -76,7 +80,10 @@ export const getRevenueAnalytics = async (req, res) => {
 // @access  Private
 export const getAttendees = async (req, res) => {
     try {
-        const userId = req.user ? req.user._id : "6753457a1234567890abcdef";
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+        const userId = req.user._id;
         const events = await Event.find({ organizer: userId });
         const eventIds = events.map(e => e._id);
 
@@ -107,7 +114,10 @@ export const getAttendees = async (req, res) => {
 // @access  Private
 export const getOrganizerProfile = async (req, res) => {
     try {
-        const userId = req.user ? req.user._id : "6753457a1234567890abcdef";
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+        const userId = req.user._id;
         const user = await User.findById(userId).select('-password');
 
         if (user) {
@@ -132,7 +142,24 @@ export const updateOrganizerProfile = async (req, res) => {
             user.fullName = req.body.fullName || user.fullName;
             user.email = req.body.email || user.email;
             user.phone = req.body.phone || user.phone;
-            // Add other fields like address if schema supports it or use mixin
+
+            // Update Organization Details
+            if (req.body.organizationDetails) {
+                user.organizationDetails = {
+                    ...user.organizationDetails,
+                    ...req.body.organizationDetails
+                };
+            }
+
+            // Update Bank Details
+            if (req.body.bankDetails) {
+                user.bankDetails = {
+                    ...user.bankDetails,
+                    ...req.body.bankDetails
+                };
+            }
+
+            // If checking "Submit for Verification", logic could go here to change kycStatus to 'pending' if it was 'not_submitted'
 
             const updatedUser = await user.save();
 
@@ -143,7 +170,10 @@ export const updateOrganizerProfile = async (req, res) => {
                     fullName: updatedUser.fullName,
                     email: updatedUser.email,
                     role: updatedUser.role,
-                    phone: updatedUser.phone
+                    phone: updatedUser.phone,
+                    organizationDetails: updatedUser.organizationDetails,
+                    bankDetails: updatedUser.bankDetails,
+                    kycStatus: updatedUser.kycStatus
                 }
             });
         } else {
@@ -151,5 +181,53 @@ export const updateOrganizerProfile = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: "Server Error updating profile" });
+    }
+};
+// @desc    Get Live Activity Feed
+// @route   GET /api/organizer/live-activity
+// @access  Private
+export const getLiveActivity = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+        const userId = req.user._id;
+
+        // Find all events by this organizer
+        const events = await Event.find({ organizer: userId });
+        const eventIds = events.map(e => e._id);
+
+        // Find recent bookings (limit 20)
+        const bookings = await Booking.find({ event: { $in: eventIds } })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .populate('user', 'fullName email')
+            .populate('event', 'title');
+
+        // Map to activity format
+        const activities = bookings.map(b => {
+            // Determine action type based on status or recent creation
+            let action = 'Ticket Sold';
+            // For now, we assume all recent bookings are sales. 
+            // In a real system, we might have a separate 'CheckIn' model or status log.
+            // If status is 'checked_in', we can call it Check-in.
+            if (b.status === 'checked_in') action = 'Check-in';
+
+            return {
+                id: b._id,
+                time: b.createdAt, // Frontend will format this
+                action: action,
+                user: b.user ? b.user.fullName : 'Guest User',
+                ticket: `#${b._id.toString().slice(-6).toUpperCase()}`, // Mock ticket ID from ObjectId
+                eventName: b.event ? b.event.title : 'Unknown Event',
+                alert: false // Add logic for alerts if needed (e.g. failed payment)
+            };
+        });
+
+        res.json({ success: true, activities });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server Error fetching live activity" });
     }
 };
