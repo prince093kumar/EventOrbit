@@ -1,7 +1,9 @@
 import express from "express";
-import { getAllEvents, createEvent } from "../controllers/event_controller.js";
+import { getAllEvents, createEvent, addReview, getEventReviews } from "../controllers/event_controller.js";
 import { protect } from "../middleware/auth_middleware.js";
 import { eventValidation, validate } from "../middleware/validator.js";
+import upload from "../middleware/upload.js";
+import { parseMultipartBody } from "../middleware/parseMultipartBody.js";
 
 const router = express.Router();
 
@@ -9,7 +11,10 @@ const router = express.Router();
 router.get("/", getAllEvents);
 
 // Private route (create event)
-// Private route (create event)
-router.post("/", protect, eventValidation, validate, createEvent);
+router.post("/", protect, upload.single('banner'), parseMultipartBody, eventValidation, validate, createEvent);
+
+// Reviews
+router.post("/:id/reviews", protect, addReview);
+router.get("/:id/reviews", getEventReviews);
 
 export default router;

@@ -14,16 +14,19 @@ const MonitorCard = ({ title, value, subtext, icon: Icon, color }) => (
     </div>
 );
 
+import { io } from 'socket.io-client';
+
 const LiveMonitor = () => {
     const [liveFeed, setLiveFeed] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         recentCheckIns: 0,
-        ticketsScanned: 0,
+        ticketsScanned: 0, // Used as 'Tickets Sold' for now
         alerts: 0
     });
 
     useEffect(() => {
+        // Fetch Initial Data
         const fetchActivity = async () => {
             try {
                 const res = await fetch('http://localhost:5000/api/organizer/live-activity', {
@@ -34,13 +37,12 @@ const LiveMonitor = () => {
                 const data = await res.json();
                 if (data.success) {
                     setLiveFeed(data.activities);
-
-                    // Calculate basic mock stats from feed for now (or fetch from stats API)
-                    setStats({
-                        recentCheckIns: data.activities.filter(a => a.action === 'Check-in').length,
-                        ticketsScanned: data.activities.length,
-                        alerts: data.activities.filter(a => a.alert).length
-                    });
+                    setStats(prev => ({
+                        ...prev,
+                        ticketsScanned: data.stats.ticketsScanned, // Total tickets from DB
+                        recentCheckIns: data.stats.recentCheckIns, // Total check-ins
+                        alerts: data.stats.alerts // Total alerts
+                    }));
                 }
             } catch (error) {
                 console.error("Error fetching live activity:", error);
@@ -50,8 +52,42 @@ const LiveMonitor = () => {
         };
 
         fetchActivity();
-        const interval = setInterval(fetchActivity, 30000); // Poll every 30s
-        return () => clearInterval(interval);
+
+        // WebSocket Connection
+        const socket = io('http://localhost:5000');
+
+        socket.on('connect', () => {
+            console.log("Connected to WebSocket");
+        });
+
+        socket.on('newBooking', (booking) => {
+            console.log("New Booking Received:", booking);
+
+            // Create activity item from booking data
+            const newActivity = {
+                id: Date.now(), // Temp ID
+                time: booking.timestamp,
+                action: 'Ticket Sold',
+                user: booking.customerName || 'New Customer',
+                ticket: `#${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+                eventName: booking.eventTitle,
+                seatNumber: booking.seatNumber,
+                alert: false
+            };
+
+            // Add to feed
+            setLiveFeed(prev => [newActivity, ...prev].slice(0, 20)); // Keep last 20
+
+            // Update Stats
+            setStats(prev => ({
+                ...prev,
+                ticketsScanned: prev.ticketsScanned + 1
+            }));
+        });
+
+        return () => {
+            socket.disconnect();
+        };
     }, []);
 
     // Time formatter helper if date-fns not available or preferred simple
@@ -120,10 +156,10 @@ const LiveMonitor = () => {
                                     </span>
                                     <div>
                                         <p className={`text-sm font-medium ${item.alert ? 'text-red-500' : 'text-[var(--text-page)]'}`}>
-                                            {item.action} <span className="text-[var(--text-muted)] font-normal text-xs">for</span> {item.eventName}
+                                            {item.user} <span className="text-[var(--text-muted)] font-normal text-xs">bought</span> {item.eventName}
                                         </p>
                                         <p className="text-xs text-[var(--text-muted)]">
-                                            {item.user} • <span className="font-mono">{item.ticket}</span>
+                                            Seat: <span className="font-mono font-bold text-purple-500">{item.seatNumber || 'N/A'}</span> • <span className="font-mono">{item.ticket}</span>
                                         </p>
                                     </div>
                                 </div>

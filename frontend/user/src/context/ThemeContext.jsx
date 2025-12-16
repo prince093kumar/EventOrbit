@@ -23,7 +23,17 @@ export const ThemeProvider = ({ children }) => {
     }, [isDarkMode]);
 
     const toggleTheme = () => {
-        setIsDarkMode((prev) => !prev);
+        setIsDarkMode((prev) => {
+            const newIsDarkMode = !prev;
+            const newTheme = newIsDarkMode ? 'dark' : 'light';
+
+            // Sync with Backend Cookie
+            import('../api/apiClient').then(({ default: client }) => {
+                client.post('/theme', { theme: newTheme }).catch(err => console.error("Theme sync failed", err));
+            });
+
+            return newIsDarkMode;
+        });
     };
 
     return (

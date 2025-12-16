@@ -14,7 +14,11 @@ const Attendees = () => {
 
     const fetchAttendees = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/organizer/attendees');
+            const res = await fetch('http://localhost:5000/api/organizer/attendees', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('eventorbit_organizer_token')}`
+                }
+            });
             const data = await res.json();
             if (data.success) {
                 setAttendees(data.attendees);
@@ -26,6 +30,45 @@ const Attendees = () => {
         }
     };
 
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [selectedId, setSelectedId] = useState(null);
+    const [cancelReason, setCancelReason] = useState("");
+
+    const updateStatus = async (id, status, reason = "") => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/organizer/booking/${id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('eventorbit_organizer_token')}`
+                },
+                body: JSON.stringify({ status, reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Refresh list
+                fetchAttendees();
+                setShowCancelModal(false);
+                setCancelReason("");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+        }
+    };
+
+    const handleCancelClick = (id) => {
+        setSelectedId(id);
+        setShowCancelModal(true);
+    };
+
+    const confirmCancel = () => {
+        if (selectedId) {
+            updateStatus(selectedId, 'cancelled', cancelReason);
+        }
+    };
+
+    // ... (Filter Logic remains same)
+
     // Filter Logic
     const filteredAttendees = attendees.filter(attendee => {
         const matchesSearch =
@@ -35,15 +78,48 @@ const Attendees = () => {
         return matchesSearch && matchesStatus;
     });
 
+    const handleExport = () => {
+        if (!attendees.length) return;
+
+        const headers = ["Name", "Email", "Phone", "Ticket Type", "Seat", "Status"];
+        const rows = attendees.map(a => [
+            a.name,
+            a.email,
+            a.phone,
+            a.ticket,
+            a.seat,
+            a.status
+        ]);
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `attendees_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+            {/* ... Header and Filters ... */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--text-page)]">Attendees</h1>
                     <p className="text-[var(--text-muted)]">Manage guest lists and check-ins.</p>
                 </div>
+                {/* ... Export Button ... */}
                 <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-[var(--text-page)] hover:bg-[var(--bg-subtle)] transition-colors text-sm font-medium">
+                    <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-[var(--text-page)] hover:bg-[var(--bg-subtle)] transition-colors text-sm font-medium">
                         <Download size={16} /> Export CSV
                     </button>
                 </div>
@@ -86,6 +162,7 @@ const Attendees = () => {
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Name</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm hidden md:table-cell">Email</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Ticket Type</th>
+                                <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Seat</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Status</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Actions</th>
                             </tr>
@@ -111,13 +188,34 @@ const Attendees = () => {
                                         </td>
                                         <td className="p-4 text-[var(--text-page)] hidden md:table-cell">{attendee.email}</td>
                                         <td className="p-4 text-[var(--text-page)]">{attendee.ticket}</td>
+                                        <td className="p-4 text-[var(--text-page)] font-mono text-xs">{attendee.seat}</td>
                                         <td className="p-4">
                                             <StatusBadge status={attendee.status} />
                                         </td>
                                         <td className="p-4">
-                                            <button className="p-2 text-[var(--text-muted)] hover:text-[var(--text-page)] hover:bg-[var(--bg-page)] rounded-full transition-colors">
-                                                <MoreVertical size={18} />
-                                            </button>
+                                            <div className="flex items-center gap-2">
+                                                {attendee.status !== 'Checked In' && attendee.status !== 'Cancelled' && (
+                                                    <button
+                                                        onClick={() => updateStatus(attendee.id, 'checked_in')}
+                                                        className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors" title="Check In">
+                                                        <CheckCircle size={18} />
+                                                    </button>
+                                                )}
+                                                {attendee.status !== 'Pending' && attendee.status !== 'Cancelled' && (
+                                                    <button
+                                                        onClick={() => updateStatus(attendee.id, 'pending')}
+                                                        className="p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors" title="Mark Pending">
+                                                        <Clock size={18} />
+                                                    </button>
+                                                )}
+                                                {attendee.status !== 'Cancelled' && (
+                                                    <button
+                                                        onClick={() => handleCancelClick(attendee.id)}
+                                                        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors" title="Cancel Booking">
+                                                        <XCircle size={18} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -132,6 +230,36 @@ const Attendees = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Cancellation Modal */}
+            {showCancelModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-[var(--bg-card)] p-6 rounded-2xl w-full max-w-md border border-[var(--border-color)] shadow-2xl animate-in fade-in zoom-in duration-200">
+                        <h3 className="text-lg font-bold text-[var(--text-page)] mb-2">Cancel Booking</h3>
+                        <p className="text-sm text-[var(--text-muted)] mb-4">Please provide a reason for cancelling this booking.</p>
+                        <textarea
+                            className="w-full p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-page)] focus:ring-2 focus:ring-red-500 outline-none h-32 resize-none"
+                            placeholder="Reason for cancellation..."
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                        />
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={() => setShowCancelModal(false)}
+                                className="flex-1 py-2 rounded-xl border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--bg-page)]"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={confirmCancel}
+                                className="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold"
+                            >
+                                Confirm Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

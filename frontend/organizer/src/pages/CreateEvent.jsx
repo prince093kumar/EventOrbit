@@ -55,6 +55,7 @@ const CreateEvent = () => {
     });
 
     const [selectedVenue, setSelectedVenue] = useState(null);
+    const [file, setFile] = useState(null);
 
     const handleVenueChange = (e) => {
         const venueId = parseInt(e.target.value);
@@ -66,23 +67,32 @@ const CreateEvent = () => {
     const [loading, setLoading] = useState(false);
 
     const handlePublish = async () => {
-        if (!selectedVenue || !eventData.title || !eventData.date || !eventData.time) {
-            alert("Please fill in all required fields and select a venue.");
+        if (!selectedVenue || !eventData.title || !eventData.date || !eventData.time || !eventData.regularPrice || !eventData.vipPrice) {
+            alert("Please fill in all required fields, including pricing, and select a venue.");
             return;
         }
 
         setLoading(true);
         try {
-            const payload = {
-                title: eventData.title,
-                category: eventData.category,
-                date: new Date(`${eventData.date}T${eventData.time}`), // Combine date & time
-                venue: selectedVenue.name,
-                description: "Event description placeholder", // Add a description field to form if needed
-                banner: "https://via.placeholder.com/800x400", // Placeholder image
-                seatMap: { General: selectedVenue.capacity },
-                price: { General: 50 }, // Default price for now
+            const formData = new FormData();
+            formData.append('title', eventData.title);
+            formData.append('category', eventData.category);
+            formData.append('date', new Date(`${eventData.date}T${eventData.time}`).toISOString()); // Send ISO date
+            formData.append('venue', selectedVenue.name);
+            formData.append('description', eventData.description || "Event description placeholder");
+            formData.append('seatMap', JSON.stringify({ General: selectedVenue.capacity })); // Send as string for parsing
+
+            // Construct Price Object
+            const priceObject = {
+                Regular: parseInt(eventData.regularPrice),
+                VIP: parseInt(eventData.vipPrice)
             };
+            formData.append('price', JSON.stringify(priceObject)); // Send as string
+
+
+            if (file) {
+                formData.append('banner', file);
+            }
 
             const token = localStorage.getItem('eventorbit_organizer_token');
             if (!token) {
@@ -93,10 +103,9 @@ const CreateEvent = () => {
             const response = await fetch('http://localhost:5000/api/events', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}` // No Content-Type (browser sets it)
                 },
-                body: JSON.stringify(payload)
+                body: formData
             });
 
             const data = await response.json();
@@ -156,6 +165,9 @@ const CreateEvent = () => {
                             >
                                 <option>Concert</option>
                                 <option>Conference</option>
+                                <option>Sports</option>
+                                <option>Art</option>
+                                <option>Comedy</option>
                                 <option>Workshop</option>
                                 <option>Exhibition</option>
                             </select>
@@ -185,6 +197,15 @@ const CreateEvent = () => {
                             />
                             <Clock className="absolute right-4 top-2.5 text-gray-400 pointer-events-none" size={18} />
                         </div>
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                        <label className="text-xs font-medium text-[var(--text-muted)]">Event Banner (Image)</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-[var(--text-page)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+                            onChange={(e) => setFile(e.target.files[0])}
+                        />
                     </div>
                     <div className="col-span-2 space-y-1">
                         <label className="text-xs font-medium text-[var(--text-muted)]">Description (Optional)</label>
@@ -234,6 +255,35 @@ const CreateEvent = () => {
                         <p className="text-2xl font-bold text-[var(--text-page)]">
                             {selectedVenue ? selectedVenue.capacity.toLocaleString() : '---'}
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. Pricing */}
+            <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-6 space-y-4">
+                <h3 className="font-bold text-[var(--text-page)] border-b border-[var(--border-color)] pb-2 mb-4">3. Ticket Pricing</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-[var(--text-muted)]">Regular Ticket Price (₹)</label>
+                        <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 500"
+                            className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-[var(--text-page)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+                            value={eventData.regularPrice || ''}
+                            onChange={(e) => setEventData({ ...eventData, regularPrice: e.target.value })}
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-[var(--text-muted)]">VIP Ticket Price (₹)</label>
+                        <input
+                            type="number"
+                            min="0"
+                            placeholder="e.g. 1500"
+                            className="w-full bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-[var(--text-page)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all"
+                            value={eventData.vipPrice || ''}
+                            onChange={(e) => setEventData({ ...eventData, vipPrice: e.target.value })}
+                        />
                     </div>
                 </div>
             </div>

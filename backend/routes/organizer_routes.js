@@ -5,7 +5,8 @@ import {
     getAttendees,
     getOrganizerProfile,
     updateOrganizerProfile,
-    getLiveActivity
+    getLiveActivity,
+    updateBookingStatus
 } from "../controllers/organizer_controller.js";
 import { protect } from "../middleware/auth_middleware.js";
 
@@ -18,6 +19,7 @@ router.get("/stats", getDashboardStats);
 router.get("/revenue", getRevenueAnalytics);
 router.get("/attendees", getAttendees);
 router.get("/live-activity", getLiveActivity);
+router.put("/booking/:id/status", updateBookingStatus);
 router.route("/profile").get(getOrganizerProfile).put(updateOrganizerProfile);
 
 export default router;

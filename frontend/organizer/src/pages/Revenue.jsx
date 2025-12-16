@@ -14,7 +14,11 @@ const Revenue = () => {
     useEffect(() => {
         const fetchRevenue = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/organizer/revenue');
+                const res = await fetch('http://localhost:5000/api/organizer/revenue', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('eventorbit_organizer_token')}`
+                    }
+                });
                 const data = await res.json();
                 if (data.success) {
                     setStats(data);

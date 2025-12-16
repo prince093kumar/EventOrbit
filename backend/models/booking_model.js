@@ -11,10 +11,12 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     default: "confirmed",
     enum: {
-      values: ["pending", "confirmed", "cancelled"],
+      values: ["pending", "confirmed", "cancelled", "checked_in"],
       message: "{VALUE} is not a valid status"
     }
-  }
+  },
+  cancellationReason: { type: String },
+  attendeeName: { type: String, required: [true, "Attendee Name is required"] }
 }, { timestamps: true });
 
 export default mongoose.model("Booking", bookingSchema);

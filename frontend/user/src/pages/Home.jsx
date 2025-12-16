@@ -104,7 +104,7 @@ const Home = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-[var(--text-page)] flex items-center gap-2">
             <Sparkles className="fill-yellow-400 text-yellow-400" size={20} />
-            {activeCategory === 'all' ? 'Recommended for You' : `${categories.find(c => c.id === activeCategory)?.label} Events`}
+            {activeCategory === 'all' ? 'Recommended for You' : `${categories.find(c => c.id === activeCategory)?.label}`}
           </h2>
           <span className="text-sm text-[var(--text-muted)] font-medium">
             {events.length} results found
@@ -119,11 +119,13 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {events.map(event => (
               <EventCard
-                key={event.id}
-                id={event.id}
+                key={event._id}
+                id={event._id}
                 title={event.title}
                 organizer={event.organizer}
                 date={new Date(event.date).toLocaleDateString()}
+                time={new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                banner={event.banner}
                 imageColor={event.imageColor}
                 price={event.price}
                 category={event.category}

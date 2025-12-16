@@ -4,6 +4,7 @@ const API_URL = "http://localhost:5000/api";
 
 const apiClient = axios.create({
     baseURL: API_URL,
+    withCredentials: true, // Enable cookies/session
     headers: {
         "Content-Type": "application/json",
     },
