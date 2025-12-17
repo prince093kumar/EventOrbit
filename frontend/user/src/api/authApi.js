@@ -3,9 +3,11 @@
 // Mock users database
 import apiClient from "./apiClient";
 
-export const loginUser = async (email, password) => {
+export const loginUser = async (email, password, role) => {
     try {
-        const response = await apiClient.post("/auth/login", { email, password });
+        const payload = { email, password };
+        if (role) payload.requiredRole = role;
+        const response = await apiClient.post("/auth/login", payload);
         if (response.data) {
             localStorage.setItem("user", JSON.stringify(response.data));
         }

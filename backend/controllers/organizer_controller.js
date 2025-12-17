@@ -154,7 +154,10 @@ export const getOrganizerProfile = async (req, res) => {
 // @access  Private
 export const updateOrganizerProfile = async (req, res) => {
     try {
-        const userId = req.user ? req.user._id : "6753457a1234567890abcdef";
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+        const userId = req.user._id;
         const user = await User.findById(userId);
 
         if (user) {
@@ -197,7 +200,8 @@ export const updateOrganizerProfile = async (req, res) => {
             res.status(404).json({ message: "User not found" });
         }
     } catch (error) {
-        res.status(500).json({ message: "Server Error updating profile" });
+        console.error("Error updating profile:", error);
+        res.status(500).json({ message: error.message || "Server Error updating profile" });
     }
 };
 
@@ -292,5 +296,22 @@ export const getLiveActivity = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Server Error fetching live activity" });
+    }
+};
+// @desc    Get All Events for Organizer
+// @route   GET /api/organizer/events
+// @access  Private
+export const getOrganizerEvents = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+        const userId = req.user._id;
+        const events = await Event.find({ organizer: userId }).sort({ date: 1 }); // Sort by date ascending
+
+        res.json({ success: true, events });
+    } catch (error) {
+        console.error("Error fetching organizer events:", error);
+        res.status(500).json({ message: "Server Error fetching events" });
     }
 };

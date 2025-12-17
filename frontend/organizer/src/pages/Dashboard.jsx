@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { TrendingUp, Calendar, DollarSign, Clock, Ticket } from 'lucide-react';
+import EventCard from '../components/EventCard';
 
 const StatCard = ({ title, value, change, icon: Icon, color }) => (
     <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-color)] shadow-sm hover:shadow-md transition-shadow">
@@ -31,6 +32,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
 
     const [activities, setActivities] = useState([]);
+    const [events, setEvents] = useState([]);
 
     useEffect(() => {
         const fetchStatsAndActivity = async () => {
@@ -55,6 +57,13 @@ const Dashboard = () => {
                 const activityData = await activityRes.json();
                 if (activityData.success) setActivities(activityData.activities);
 
+                // Fetch My Events (NEW)
+                const eventsRes = await fetch('http://localhost:5000/api/organizer/events', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const eventsData = await eventsRes.json();
+                if (eventsData.success) setEvents(eventsData.events);
+
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
             } finally {
@@ -66,7 +75,7 @@ const Dashboard = () => {
     }, [isAuthenticated, token]);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div>
                 <h1 className="text-2xl font-bold text-[var(--text-page)]">Organizer Dashboard</h1>
                 <p className="text-[var(--text-muted)]">Overview of your events and sales.</p>
@@ -77,6 +86,31 @@ const Dashboard = () => {
                 <StatCard title="Tickets Sold" value={stats.ticketsSold} change="+12.5%" icon={Ticket} color="bg-gradient-to-br from-blue-400 to-indigo-600" />
                 <StatCard title="Events Active" value={stats.eventsActive} change="Active" icon={Calendar} color="bg-gradient-to-br from-purple-400 to-pink-600" />
                 <StatCard title="Pending Approval" value={stats.pendingApproval} change="Waiting" icon={Clock} color="bg-gradient-to-br from-yellow-400 to-orange-500" />
+            </div>
+
+            {/* My Events Section */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-xl text-[var(--text-page)]">My Events</h3>
+                    <a href="/create-event" className="text-sm text-indigo-500 hover:text-indigo-400 font-medium">Create New +</a>
+                </div>
+
+                {loading ? (
+                    <div className="text-center py-10 text-[var(--text-muted)]">Loading events...</div>
+                ) : events.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {events.map(event => (
+                            <EventCard key={event._id} event={event} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-8 text-center">
+                        <p className="text-[var(--text-muted)] mb-4">You haven't created any events yet.</p>
+                        <a href="/create-event" className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+                            Create Event
+                        </a>
+                    </div>
+                )}
             </div>
 
             {/* Recent Activity */}

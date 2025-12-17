@@ -18,6 +18,9 @@ const Profile = () => {
         },
         kycStatus: 'not_submitted'
     });
+    const [verificationFile, setVerificationFile] = useState(null);
+    const [verificationStatus, setVerificationStatus] = useState('pending'); // pending, uploaded, verified
+    const fileInputRef = React.useRef(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -65,8 +68,11 @@ const Profile = () => {
             const data = await res.json();
             if (data.success) {
                 alert("Profile Updated Successfully!");
+                if (verificationFile) {
+                    setUserData(prev => ({ ...prev, kycStatus: 'pending' }));
+                }
             } else {
-                alert("Failed to update profile.");
+                alert(data.message || "Failed to update profile.");
             }
         } catch (error) {
             console.error("Error updating profile:", error);
@@ -111,8 +117,10 @@ const Profile = () => {
                                 type="text"
                                 value={userData.organizationDetails.orgName}
                                 onChange={(e) => handleNestedChange('organizationDetails', 'orgName', e.target.value)}
-                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50"
+                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="Sonic Boom Inc."
+                                required
+                                disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
                             />
                         </div>
                         <div className="space-y-1">
@@ -121,7 +129,9 @@ const Profile = () => {
                                 type="email"
                                 value={userData.email}
                                 onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50"
+                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                required
+                                disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
                             />
                         </div>
                         <div className="space-y-1 md:col-span-2">
@@ -130,8 +140,10 @@ const Profile = () => {
                                 type="text"
                                 value={userData.organizationDetails.address}
                                 onChange={(e) => handleNestedChange('organizationDetails', 'address', e.target.value)}
-                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50"
+                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="123 Audio Lane, Neo Tokyo"
+                                required
+                                disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
                             />
                         </div>
                     </div>
@@ -147,8 +159,10 @@ const Profile = () => {
                                 type="text"
                                 value={userData.bankDetails.accountHolderName}
                                 onChange={(e) => handleNestedChange('bankDetails', 'accountHolderName', e.target.value)}
-                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50"
+                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="Account Holder Name"
+                                required
+                                disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
                             />
                         </div>
                         <div className="space-y-1">
@@ -157,8 +171,10 @@ const Profile = () => {
                                 type="text"
                                 value={userData.bankDetails.bankName}
                                 onChange={(e) => handleNestedChange('bankDetails', 'bankName', e.target.value)}
-                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50"
+                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="Bank Name"
+                                required
+                                disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
                             />
                         </div>
                         <div className="space-y-1">
@@ -167,8 +183,10 @@ const Profile = () => {
                                 type="text"
                                 value={userData.bankDetails.accountNumber}
                                 onChange={(e) => handleNestedChange('bankDetails', 'accountNumber', e.target.value)}
-                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50"
+                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="Account Number"
+                                required
+                                disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
                             />
                         </div>
                         <div className="space-y-1">
@@ -177,8 +195,10 @@ const Profile = () => {
                                 type="text"
                                 value={userData.bankDetails.ifscCode}
                                 onChange={(e) => handleNestedChange('bankDetails', 'ifscCode', e.target.value)}
-                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50"
+                                className="w-full px-4 py-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="IFSC / Swift Code"
+                                required
+                                disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
                             />
                         </div>
                     </div>
@@ -187,29 +207,83 @@ const Profile = () => {
                 {/* Verification Documents */}
                 <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6">
                     <h3 className="font-bold text-[var(--text-page)] text-lg mb-6">Verification Documents</h3>
-                    <div className="border-[2px] border-dashed border-[var(--border-color)] rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer group">
+                    <div
+                        onClick={() => fileInputRef.current.click()}
+                        className="border-[2px] border-dashed border-[var(--border-color)] rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-[var(--bg-subtle)] transition-colors cursor-pointer group"
+                    >
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    setVerificationFile(file);
+                                    setVerificationStatus('uploaded');
+                                }
+                            }}
+                        />
                         <div className="w-12 h-12 bg-[#FFDA8A]/20 rounded-full flex items-center justify-center text-yellow-600 mb-3 group-hover:scale-110 transition-transform">
                             <Upload size={24} />
                         </div>
-                        <p className="text-sm font-medium text-[var(--text-page)]">Click to Upload Business License / Tax ID</p>
+                        <p className="text-sm font-medium text-[var(--text-page)]">
+                            {verificationFile ? `Selected: ${verificationFile.name}` : "Click to Upload Business License / Tax ID"}
+                        </p>
                     </div>
 
-                    {/* Mock verified status */}
-                    <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg flex justify-between items-center text-sm border border-green-200 dark:border-green-800">
-                        <div className="flex items-center gap-2">
-                            <CheckCircle size={16} />
-                            <span>identity_proof.pdf</span>
+                    {/* Verified/Uploaded Status */}
+                    {(verificationFile || userData.kycStatus === 'approved') && (
+                        <div className={`mt-4 p-3 rounded-lg flex justify-between items-center text-sm border ${userData.kycStatus === 'approved'
+                            ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
+                            : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                            }`}>
+                            <div className="flex items-center gap-2">
+                                <CheckCircle size={16} />
+                                <span>{verificationFile ? verificationFile.name : 'identity_proof.pdf'}</span>
+                            </div>
+                            <span className="font-semibold">{userData.kycStatus === 'approved' ? 'Verified' : 'Ready to Submit'}</span>
                         </div>
-                        <span className="font-semibold">Verified</span>
-                    </div>
+                    )}
                 </div>
 
                 <button
                     onClick={handleSave}
-                    className="w-48 py-3 bg-gradient-to-r from-[#FFDA8A] to-[#ffc107] text-gray-900 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                    disabled={userData.kycStatus === 'pending' || userData.kycStatus === 'approved'}
+                    className={`w-48 py-3 font-bold rounded-xl shadow-lg transition-all ${userData.kycStatus === 'pending' || userData.kycStatus === 'approved'
+                        ? 'bg-gray-300 dark:bg-slate-700 text-gray-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-[#FFDA8A] to-[#ffc107] text-gray-900 hover:shadow-xl'
+                        }`}
                 >
-                    Save Profile
+                    {userData.kycStatus === 'pending' ? 'Verification Pending' : userData.kycStatus === 'approved' ? 'Profile Verified' : 'Save Profile'}
                 </button>
+
+                {/* Submission Details Card */}
+                {userData.kycStatus !== 'not_submitted' && (
+                    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-4">
+                        <h3 className="font-bold text-[var(--text-page)] text-lg mb-4">Submission Summary</h3>
+                        <div className="space-y-3 text-sm">
+                            <div className="flex justify-between py-2 border-b border-[var(--border-color)]">
+                                <span className="text-[var(--text-muted)]">Status</span>
+                                <span className={`font-bold capitalize ${userData.kycStatus === 'approved' ? 'text-green-600' :
+                                    userData.kycStatus === 'rejected' ? 'text-red-600' : 'text-yellow-600'
+                                    }`}>{userData.kycStatus.replace('_', ' ')}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-[var(--border-color)]">
+                                <span className="text-[var(--text-muted)]">Organization</span>
+                                <span className="text-[var(--text-page)] font-medium">{userData.organizationDetails.orgName}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-[var(--border-color)]">
+                                <span className="text-[var(--text-muted)]">Submitted Date</span>
+                                <span className="text-[var(--text-page)] font-medium">{new Date().toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                                <span className="text-[var(--text-muted)]">Address</span>
+                                <span className="text-[var(--text-page)] font-medium">{userData.organizationDetails.address}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

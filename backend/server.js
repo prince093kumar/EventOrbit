@@ -47,7 +47,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'secret_key_session',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 5 * 60 * 1000 } // 5 minutes
+  cookie: { maxAge: 10 * 60 * 1000 } // 10 minutes
 }));
 
 // Theme Preference Route

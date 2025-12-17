@@ -30,7 +30,9 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password, role) => {
         try {
-            const userData = await loginUser(email, password, role);
+            // Force role 'user' for this panel if strict separation is desired, or pass provided role
+            // Based on requirement, we enforce 'user' access implementation
+            const userData = await loginUser(email, password, 'user');
             setUser(userData);
             localStorage.setItem('eventorbit_user', JSON.stringify(userData));
             return { success: true };

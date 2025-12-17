@@ -48,12 +48,19 @@ export const registerUser = async (req, res) => {
 // @access  Public
 export const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, requiredRole } = req.body;
 
         // Check for user email
         const user = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
+            // Role Enforcement
+            if (requiredRole && user.role !== requiredRole) {
+                return res.status(403).json({
+                    message: `Access denied. accounts with role '${user.role}' cannot access this panel.`
+                });
+            }
+
             res.json({
                 _id: user.id,
                 fullName: user.fullName,

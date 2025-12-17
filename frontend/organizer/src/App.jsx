@@ -11,6 +11,8 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import { useAuth } from './context/AuthContext';
 
+import SessionTimeoutHandler from './components/SessionTimeoutHandler';
+
 // Simple Protected Route Component
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -25,6 +27,7 @@ const ProtectedRoute = ({ children }) => {
 function App() {
     return (
         <Router>
+            <SessionTimeoutHandler />
             <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={<SignIn />} />

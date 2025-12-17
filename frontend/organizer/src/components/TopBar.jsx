@@ -8,6 +8,7 @@ const TopBar = ({ toggleSidebar }) => {
     const { isDarkMode, toggleTheme } = useTheme();
     const { user, logout, isAuthenticated } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
     // Dummy Notifications
     const notifications = [
@@ -113,29 +114,63 @@ const TopBar = ({ toggleSidebar }) => {
                         )}
                     </div>
 
-                    {/* Auth Action */}
+                    {/* Auth Action & Profile Dropdown */}
                     {isAuthenticated ? (
-                        <button onClick={logout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-full transition-colors" title="Sign Out">
-                            <LogOut size={20} />
-                        </button>
-                    ) : (
-                        <Link to="/login" className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/10 rounded-full transition-colors" title="Sign In">
-                            <LogOut size={20} className="rotate-180" /> {/* Flip icon or use Login icon */}
-                        </Link>
-                    )}
-                </div>
+                        <div className="relative pl-4 border-l border-[var(--border-color)]">
+                            <button
+                                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                                className="flex items-center gap-3 hover:bg-[var(--bg-subtle)] p-2 rounded-lg transition-colors text-left"
+                            >
+                                <div className="hidden sm:block">
+                                    <p className="text-xs font-bold text-[var(--text-page)]">
+                                        {user?.fullName || 'Organizer'}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--text-muted)]">Organizer</p>
+                                </div>
+                                <div className="w-9 h-9 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                                    {user?.fullName?.charAt(0) || 'O'}
+                                </div>
+                            </button>
 
-                {/* Profile Avatar */}
-                <div className="hidden sm:flex items-center gap-3 border-l border-[var(--border-color)] pl-4">
-                    <div className="text-right">
-                        <p className="text-xs font-bold text-[var(--text-page)]">
-                            {isAuthenticated ? (user?.fullName || 'Organizer') : 'Guest User'}
-                        </p>
-                        <p className="text-[10px] text-[var(--text-muted)]">{isAuthenticated ? 'Organizer' : 'Read Only'}</p>
-                    </div>
-                    <div className="w-9 h-9 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                        {isAuthenticated ? (user?.fullName?.charAt(0) || 'O') : 'G'}
-                    </div>
+                            {/* Profile Dropdown */}
+                            {showProfileDropdown && (
+                                <div className="absolute right-0 mt-2 w-56 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="px-4 py-3 border-b border-[var(--border-color)]">
+                                        <p className="text-xs text-[var(--text-muted)]">Signed in as</p>
+                                        <p className="text-sm font-bold text-[var(--text-page)] truncate">{user?.email}</p>
+                                    </div>
+                                    <div className="py-1">
+                                        <Link
+                                            to="/profile"
+                                            onClick={() => setShowProfileDropdown(false)}
+                                            className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-page)] hover:bg-[var(--bg-subtle)]"
+                                        >
+                                            <User size={16} />
+                                            Your Profile
+                                        </Link>
+                                    </div>
+                                    <div className="py-1 border-t border-[var(--border-color)]">
+                                        <button
+                                            onClick={() => {
+                                                logout();
+                                                setShowProfileDropdown(false);
+                                            }}
+                                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 text-left"
+                                        >
+                                            <LogOut size={16} />
+                                            Sign out
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="pl-4 border-l border-[var(--border-color)]">
+                            <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                Login
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>
