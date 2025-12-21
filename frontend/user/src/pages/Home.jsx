@@ -96,7 +96,7 @@ const Home = () => {
                 setSearchParams({}, { replace: true });
               }
             }}
-            className={`whitespace - nowrap px - 5 py - 2.5 rounded - full text - sm font - medium transition - all ${activeCategory === cat.id
+            className={`whitespace-nowrap px-8 py-4 rounded-full text-sm font-medium transition-all ${activeCategory === cat.id
               ? 'bg-[#FFDA8A] text-gray-900 shadow-md shadow-[#FFDA8A]/20'
               : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'
               } `}

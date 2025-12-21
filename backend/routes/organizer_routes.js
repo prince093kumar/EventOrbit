@@ -10,6 +10,8 @@ import {
     getOrganizerEvents
 } from "../controllers/organizer_controller.js";
 import { protect } from "../middleware/auth_middleware.js";
+import upload from "../middleware/upload.js";
+import { parseMultipartBody } from "../middleware/parseMultipartBody.js";
 
 const router = express.Router();
 
@@ -22,6 +24,6 @@ router.get("/attendees", getAttendees);
 router.get("/live-activity", getLiveActivity);
 router.get("/events", getOrganizerEvents);
 router.put("/booking/:id/status", updateBookingStatus);
-router.route("/profile").get(getOrganizerProfile).put(updateOrganizerProfile);
+router.route("/profile").get(getOrganizerProfile).put(upload.single('kycDocument'), parseMultipartBody, updateOrganizerProfile);
 
 export default router;

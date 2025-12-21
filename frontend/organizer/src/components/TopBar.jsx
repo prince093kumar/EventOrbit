@@ -90,8 +90,8 @@ const TopBar = ({ toggleSidebar }) => {
 
             {/* Actions */}
             <div className="flex items-center gap-3 sm:gap-4 ml-auto lg:ml-0">
-                {/* Search (Compact) */}
-                <div className="hidden xl:flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-2 rounded-lg border border-[var(--border-color)] w-64 focus-within:ring-2 focus-within:ring-yellow-400/50 transition-all">
+                {/* Search (Compact Interface) */}
+                <div className="hidden xl:flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-2 rounded-lg border border-[var(--border-color)] w-40 focus-within:ring-2 focus-within:ring-yellow-400/50 transition-all">
                     <Search size={16} className="text-gray-400" />
                     <input
                         type="text"

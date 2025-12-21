@@ -72,14 +72,35 @@ const KYC = () => {
             // Save to Backend
             const token = localStorage.getItem('eventorbit_organizer_token');
             if (token) {
-                await fetch('http://localhost:5000/api/organizer/profile', {
+                const data = new FormData();
+                data.append('organizationDetails', JSON.stringify(formData.organizationDetails));
+                data.append('bankDetails', JSON.stringify(formData.bankDetails));
+
+                // Important: Set kycStatus to pending if submitting with a file
+                if (verificationFile) {
+                    data.append('kycStatus', 'pending');
+                    data.append('kycDocument', verificationFile);
+                } else {
+                    data.append('kycStatus', formData.kycStatus);
+                }
+
+                const res = await fetch('http://localhost:5000/api/organizer/profile', {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
+                        // Browser will automatically set multipart/form-data with boundary
                     },
-                    body: JSON.stringify(formData)
+                    body: data
                 });
+
+                const resData = await res.json();
+                if (resData.success) {
+                    setFormData(prev => ({
+                        ...prev,
+                        kycStatus: resData.user.kycStatus || 'pending',
+                        organizationDetails: resData.user.organizationDetails || prev.organizationDetails
+                    }));
+                }
             }
 
             // Also persist locally as backup/simulate
@@ -111,8 +132,8 @@ const KYC = () => {
 
             {/* Status Banner */}
             <div className={`p-4 rounded-xl border flex items-center gap-3 ${formData.kycStatus === 'approved' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400' :
-                    formData.kycStatus === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400' :
-                        'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400'
+                formData.kycStatus === 'pending' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400' :
+                    'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400'
                 }`}>
                 <ShieldCheck size={24} />
                 <div>
@@ -234,7 +255,7 @@ const KYC = () => {
                         <div className="flex justify-between py-2 border-b border-[var(--border-color)]">
                             <span className="text-[var(--text-muted)]">Status</span>
                             <span className={`font-bold capitalize ${formData.kycStatus === 'approved' ? 'text-green-600' :
-                                    formData.kycStatus === 'rejected' ? 'text-red-600' : 'text-yellow-600'
+                                formData.kycStatus === 'rejected' ? 'text-red-600' : 'text-yellow-600'
                                 }`}>{formData.kycStatus.replace('_', ' ')}</span>
                         </div>
                         <div className="flex justify-between py-2 border-b border-[var(--border-color)]">

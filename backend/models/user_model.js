@@ -41,7 +41,8 @@ const userSchema = new mongoose.Schema({
   // Organizer Specific Fields (KYC)
   organizationDetails: {
     orgName: { type: String },
-    address: { type: String }
+    address: { type: String },
+    kycDocument: { type: String }
   },
   bankDetails: {
     accountHolderName: { type: String },

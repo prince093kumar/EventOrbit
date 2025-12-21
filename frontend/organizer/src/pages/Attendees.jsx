@@ -81,11 +81,12 @@ const Attendees = () => {
     const handleExport = () => {
         if (!attendees.length) return;
 
-        const headers = ["Name", "Email", "Phone", "Ticket Type", "Seat", "Status"];
+        const headers = ["Name", "Email", "Phone", "Event", "Ticket Type", "Seat", "Status"];
         const rows = attendees.map(a => [
             a.name,
             a.email,
             a.phone,
+            a.event,
             a.ticket,
             a.seat,
             a.status
@@ -160,8 +161,9 @@ const Attendees = () => {
                         <thead>
                             <tr className="border-b border-[var(--border-color)] bg-[var(--bg-subtle)]">
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Name</th>
+                                <th className="p-4 font-medium text-[var(--text-muted)] text-sm hidden md:table-cell text-center">Event Name</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm hidden md:table-cell">Email</th>
-                                <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Ticket Type</th>
+                                <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Type</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Seat</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Status</th>
                                 <th className="p-4 font-medium text-[var(--text-muted)] text-sm">Actions</th>
@@ -182,11 +184,15 @@ const Attendees = () => {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium text-[var(--text-page)]">{attendee.name}</p>
+                                                    <p className="text-[10px] text-purple-600 font-bold md:hidden">{attendee.event}</p>
                                                     <p className="text-xs text-[var(--text-muted)] md:hidden">{attendee.email}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-[var(--text-page)] hidden md:table-cell">{attendee.email}</td>
+                                        <td className="p-4 text-[var(--text-page)] hidden md:table-cell max-w-[150px] truncate font-semibold text-center text-xs">
+                                            {attendee.event}
+                                        </td>
+                                        <td className="p-4 text-[var(--text-page)] hidden md:table-cell text-sm">{attendee.email}</td>
                                         <td className="p-4 text-[var(--text-page)]">
                                             <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${attendee.ticket?.toLowerCase() === 'vip'
                                                 ? 'bg-amber-100 text-amber-700 border border-amber-200'

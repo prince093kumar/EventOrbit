@@ -63,7 +63,7 @@ const Organizers = () => {
                             <th className="px-6 py-4">Contact</th>
                             <th className="px-6 py-4">Details</th>
                             <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4">Wallet</th>
+                            <th className="px-6 py-4">Document</th>
                             <th className="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -94,7 +94,21 @@ const Organizers = () => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    ₹{org.walletBalance || 0}
+                                    {org.organizationDetails?.kycDocument ? (
+                                        <a
+                                            href={org.organizationDetails.kycDocument}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 text-blue-500 hover:text-blue-700 font-medium text-sm bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors w-fit"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            View Doc
+                                        </a>
+                                    ) : (
+                                        <span className="text-xs text-slate-400 italic flex items-center gap-1">
+                                            <XCircle className="w-3 h-3" /> No Upload
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex items-center justify-end space-x-2">

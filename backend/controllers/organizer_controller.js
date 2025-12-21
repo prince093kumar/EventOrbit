@@ -116,6 +116,7 @@ export const getAttendees = async (req, res) => {
                 phone: b.user ? b.user.phone : 'N/A',
                 ticket: b.seatType || 'General',
                 seat: b.seatNumber || 'N/A',
+                event: b.event ? b.event.title : 'N/A',
                 status: displayStatus
             };
         });
@@ -167,6 +168,7 @@ export const updateOrganizerProfile = async (req, res) => {
             user.email = req.body.email || user.email;
             user.phone = req.body.phone || user.phone;
             user.location = req.body.location || user.location;
+            user.kycStatus = req.body.kycStatus || user.kycStatus;
 
             // Update Organization Details
             if (req.body.organizationDetails) {
@@ -174,6 +176,14 @@ export const updateOrganizerProfile = async (req, res) => {
                     ...user.organizationDetails,
                     ...req.body.organizationDetails
                 };
+
+                // Explicitly check for kycDocument (from Cloudinary upload)
+                if (req.file && req.file.path) {
+                    user.organizationDetails.kycDocument = req.file.path;
+                } else if (req.body.organizationDetails && req.body.organizationDetails.kycDocument) {
+                    // Fallback for direct URL updates (if any)
+                    user.organizationDetails.kycDocument = req.body.organizationDetails.kycDocument;
+                }
             }
 
             // Update Bank Details

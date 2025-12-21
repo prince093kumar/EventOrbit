@@ -13,6 +13,16 @@ export const parseMultipartBody = (req, res, next) => {
             req.body.seatMap = JSON.parse(req.body.seatMap);
         }
 
+        // Parse 'organizationDetails' if it's a string
+        if (req.body.organizationDetails && typeof req.body.organizationDetails === 'string') {
+            req.body.organizationDetails = JSON.parse(req.body.organizationDetails);
+        }
+
+        // Parse 'bankDetails' if it's a string
+        if (req.body.bankDetails && typeof req.body.bankDetails === 'string') {
+            req.body.bankDetails = JSON.parse(req.body.bankDetails);
+        }
+
         next();
     } catch (error) {
         console.error("Error parsing multipart JSON:", error);
