@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import EventCard from '../components/EventCard';
+import BookingModal from '../components/BookingModal';
 import { Star, Loader2, Sparkles } from 'lucide-react';
 import { fetchEvents, fetchCategories, searchEvents } from '../api/eventApi';
 
@@ -9,8 +10,15 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const eventsSectionRef = useRef(null);
+
+  const handleBookClick = (event) => {
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  };
 
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('search');
@@ -38,7 +46,6 @@ const Home = () => {
 
         setEvents(eventsData);
         if (categories.length === 0) setCategories(categoriesData);
-      } catch (error) {
         console.error("Failed to load events", error);
       } finally {
         setLoading(false);
@@ -89,10 +96,10 @@ const Home = () => {
                 setSearchParams({}, { replace: true });
               }
             }}
-            className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-medium transition-all ${activeCategory === cat.id
+            className={`whitespace - nowrap px - 5 py - 2.5 rounded - full text - sm font - medium transition - all ${activeCategory === cat.id
               ? 'bg-[#FFDA8A] text-gray-900 shadow-md shadow-[#FFDA8A]/20'
               : 'bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'
-              }`}
+              } `}
           >
             {cat.label}
           </button>
@@ -104,7 +111,7 @@ const Home = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-[var(--text-page)] flex items-center gap-2">
             <Sparkles className="fill-yellow-400 text-yellow-400" size={20} />
-            {activeCategory === 'all' ? 'Recommended for You' : `${categories.find(c => c.id === activeCategory)?.label}`}
+            {activeCategory === 'all' ? 'Recommended for You' : `${categories.find(c => c.id === activeCategory)?.label} Events`}
           </h2>
           <span className="text-sm text-[var(--text-muted)] font-medium">
             {events.length} results found
@@ -119,17 +126,17 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {events.map(event => (
               <EventCard
-                key={event._id}
-                id={event._id}
+                key={event.id || event._id}
+                id={event.id || event._id}
                 title={event.title}
                 organizer={event.organizer}
-                date={new Date(event.date).toLocaleDateString()}
-                time={new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                banner={event.banner}
+                date={event.date}
                 imageColor={event.imageColor}
                 price={event.price}
                 category={event.category}
-                location={event.location}
+                location={event.venue}
+                banner={event.banner}
+                onBookClick={handleBookClick}
               />
             ))}
           </div>
@@ -145,6 +152,17 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      {/* Booking Modal */}
+      {selectedEvent && isModalOpen && (
+        <BookingModal
+          event={selectedEvent}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedEvent(null);
+          }}
+        />
+      )}
     </div>
   );
 };

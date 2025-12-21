@@ -1,5 +1,6 @@
 import Event from "../models/event_model.js";
 import Review from "../models/review_model.js";
+import Booking from "../models/booking_model.js";
 
 // @desc    Get all events
 // @route   GET /api/events
@@ -12,6 +13,9 @@ export const getAllEvents = async (req, res) => {
         if (category && category !== 'all') {
             filter.category = category;
         }
+
+        // Only show approved events to public users
+        filter.status = 'approved';
 
         const events = await Event.find(filter).populate('organizer', 'fullName');
         res.json({ success: true, events });
@@ -54,6 +58,15 @@ export const createEvent = async (req, res) => {
         });
 
         const savedEvent = await newEvent.save();
+
+        if (req.io) {
+            req.io.emit('eventCreated', {
+                eventTitle: savedEvent.title,
+                organizerName: req.user ? req.user.fullName : 'Organizer',
+                timestamp: new Date()
+            });
+        }
+
         res.status(201).json({ success: true, event: savedEvent });
 
     } catch (error) {
@@ -79,8 +92,21 @@ export const addReview = async (req, res) => {
         }
 
         // Check if event has ended
-        if (new Date(event.date) > new Date()) {
-            return res.status(400).json({ success: false, message: "You can only review events that have ended." });
+        // if (new Date(event.date) > new Date()) {
+        //     return res.status(400).json({ success: false, message: "You can only review events that have ended." });
+        // }
+        // NOTE: User requested to review after check-in, regardless of strict date end (e.g., during event or right after scan).
+        // So we strictly enforce 'checked_in' status instead.
+
+        // Enforce Check-In Status
+        const booking = await Booking.findOne({
+            user: req.user._id,
+            event: eventId,
+            status: 'checked_in'
+        });
+
+        if (!booking) {
+            return res.status(403).json({ success: false, message: "You can only review events you have checked in for." });
         }
 
         const review = await Review.create({
@@ -113,6 +139,25 @@ export const getEventReviews = async (req, res) => {
         res.json({ success: true, reviews });
     } catch (error) {
         console.error("Error fetching reviews:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+// @desc    Get User's Reviews
+// @route   GET /api/events/my-reviews
+// @access  Private
+export const getUserReviews = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ success: false, message: "Not authorized" });
+        }
+
+        const reviews = await Review.find({ user: req.user._id })
+            .populate('event', 'title date banner')
+            .sort({ createdAt: -1 });
+
+        res.json({ success: true, reviews });
+    } catch (error) {
+        console.error("Error fetching user reviews:", error);
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };

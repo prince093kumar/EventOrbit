@@ -14,10 +14,8 @@ import Reviews from './pages/Reviews';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
-import EventDetails from './pages/EventDetails';
-
 // Placeholder Pages for now
-// const EventDetails is now imported from pages/EventDetails
+const EventDetails = () => <div className="p-8"><h1 className="text-2xl font-bold">Event Details</h1></div>;
 const SeatSelection = () => <div className="p-8"><h1 className="text-2xl font-bold">Seat Selection</h1></div>;
 const Checkout = () => <div className="p-8"><h1 className="text-2xl font-bold">Checkout</h1></div>;
 

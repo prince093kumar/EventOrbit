@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -7,9 +8,13 @@ import LiveMonitor from './pages/LiveMonitor';
 import Attendees from './pages/Attendees';
 import Revenue from './pages/Revenue';
 import Profile from './pages/Profile';
+import KYC from './pages/KYC';
+import Notifications from './pages/Notifications';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import GateKeeper from './pages/GateKeeper';
 import { useAuth } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 
 import SessionTimeoutHandler from './components/SessionTimeoutHandler';
 
@@ -28,24 +33,29 @@ function App() {
     return (
         <Router>
             <SessionTimeoutHandler />
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/login" element={<SignIn />} />
-                <Route path="/signup" element={<SignUp />} />
+            <NotificationProvider>
+                <Routes>
+                    {/* Public Routes */}
+                    <Route path="/login" element={<SignIn />} />
+                    <Route path="/signup" element={<SignUp />} />
 
-                {/* Dashboard Layout Routes */}
-                <Route path="/" element={<DashboardLayout />}>
-                    {/* Dashboard is accessible to guests (Guest Mode handled inside) */}
-                    <Route index element={<Dashboard />} />
+                    {/* Dashboard Layout Routes */}
+                    <Route path="/" element={<DashboardLayout />}>
+                        {/* Dashboard is accessible to guests (Guest Mode handled inside) */}
+                        <Route index element={<Dashboard />} />
 
-                    {/* Protected Routes */}
-                    <Route path="create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
-                    <Route path="live-monitor" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
-                    <Route path="attendees" element={<ProtectedRoute><Attendees /></ProtectedRoute>} />
-                    <Route path="revenue" element={<ProtectedRoute><Revenue /></ProtectedRoute>} />
-                    <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                </Route>
-            </Routes>
+                        {/* Protected Routes */}
+                        <Route path="create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
+                        <Route path="live-monitor" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
+                        <Route path="attendees" element={<ProtectedRoute><Attendees /></ProtectedRoute>} />
+                        <Route path="revenue" element={<ProtectedRoute><Revenue /></ProtectedRoute>} />
+                        <Route path="kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
+                        <Route path="scan" element={<ProtectedRoute><GateKeeper /></ProtectedRoute>} />
+                        <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                        <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                    </Route>
+                </Routes>
+            </NotificationProvider>
         </Router>
     );
 }

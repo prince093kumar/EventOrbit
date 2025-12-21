@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, CalendarPlus, Activity, Users, DollarSign, UserCheck, LogOut, Ticket } from 'lucide-react';
+import { LayoutDashboard, CalendarPlus, Activity, Users, DollarSign, UserCheck, LogOut, Ticket, Scan } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
@@ -21,7 +21,7 @@ const Sidebar = () => {
             <div className="h-20 flex items-center px-6 border-b border-[var(--border-color)]">
                 <div className="flex items-center gap-2 font-bold text-2xl text-[var(--text-page)]">
                     <Ticket className="text-yellow-500 fill-yellow-500" />
-                    <span>EO<span className="text-yellow-500">Admin</span></span>
+                    <span>EO<span className="text-yellow-500">GANIZER</span></span>
                 </div>
             </div>
 

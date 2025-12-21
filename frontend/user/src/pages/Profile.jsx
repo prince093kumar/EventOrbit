@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { changePassword } from '../api/authApi';
-import { User, Mail, Phone, MapPin, Camera, Save, Lock, Shield, Loader2, X, ZoomIn, ZoomOut, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import apiClient from '../api/apiClient'; // Import apiClient
+import { User, Mail, Phone, MapPin, Camera, Save, Lock, Shield, Loader2, X, ZoomIn, ZoomOut, RotateCcw, Eye, EyeOff, Edit2 } from 'lucide-react';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '../utils/canvasUtils';
 import { indianCities } from '../utils/cities';
@@ -9,6 +10,7 @@ import { indianCities } from '../utils/cities';
 const Profile = () => {
     const { user } = useAuth();
 
+    const [isEditing, setIsEditing] = useState(false); // Edit Mode State
     const [loading, setLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
     const [avatarPreview, setAvatarPreview] = useState(null);
@@ -157,16 +159,25 @@ const Profile = () => {
         e.preventDefault();
         setLoading(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Persist to localStorage
-        localStorage.setItem('user_profile_data', JSON.stringify(formData));
-
-        setLoading(false);
-        setSuccessMsg('Profile updated successfully!');
-
-        setTimeout(() => setSuccessMsg(''), 3000);
+        try {
+            const res = await apiClient.put('/auth/profile', formData);
+            if (res.data.success) {
+                setSuccessMsg('Profile updated successfully!');
+                setIsEditing(false); // Lock edit mode on success
+                // Update local storage to reflect new details instantly
+                localStorage.setItem('user_profile_data', JSON.stringify(formData));
+                const currentUser = JSON.parse(localStorage.getItem('eventorbit_user'));
+                if (currentUser) {
+                    localStorage.setItem('eventorbit_user', JSON.stringify({ ...currentUser, ...formData }));
+                }
+            }
+        } catch (error) {
+            console.error("Update failed", error);
+            setSuccessMsg(error.response?.data?.message || 'Failed to update profile.'); // Show actual error
+        } finally {
+            setLoading(false);
+            setTimeout(() => setSuccessMsg(''), 3000);
+        }
     };
 
     const handleImageClick = () => {
@@ -339,12 +350,13 @@ const Profile = () => {
                                     name="fullName"
                                     value={formData.fullName}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-[var(--border-color)] rounded-xl text-[var(--text-page)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 focus:border-[#FFDA8A] transition-all"
+                                    disabled={!isEditing}
+                                    className={`w-full px-4 py-2.5 border border-[var(--border-color)] rounded-xl text-[var(--text-page)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 focus:border-[#FFDA8A] transition-all ${!isEditing ? 'bg-gray-50 dark:bg-slate-800/50 cursor-not-allowed opacity-75' : 'bg-white dark:bg-slate-900'}`}
                                     placeholder="John Doe"
                                 />
                             </div>
 
-                            {/* Email (Read Only) */}
+                            {/* Email (Read Only - Always Disabled) */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-[var(--text-page)] flex items-center gap-2">
                                     <Mail size={16} className="text-[#FFDA8A]" /> Email Address
@@ -368,7 +380,8 @@ const Profile = () => {
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-[var(--border-color)] rounded-xl text-[var(--text-page)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 focus:border-[#FFDA8A] transition-all"
+                                    disabled={!isEditing}
+                                    className={`w-full px-4 py-2.5 border border-[var(--border-color)] rounded-xl text-[var(--text-page)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 focus:border-[#FFDA8A] transition-all ${!isEditing ? 'bg-gray-50 dark:bg-slate-800/50 cursor-not-allowed opacity-75' : 'bg-white dark:bg-slate-900'}`}
                                     placeholder="+91 98765 43210"
                                 />
                             </div>
@@ -383,14 +396,15 @@ const Profile = () => {
                                     name="location"
                                     value={formData.location}
                                     onChange={handleLocationChange}
+                                    disabled={!isEditing}
                                     onFocus={() => {
-                                        if (formData.location) setShowCitySuggestions(true);
+                                        if (formData.location && isEditing) setShowCitySuggestions(true);
                                     }}
                                     onBlur={() => setTimeout(() => setShowCitySuggestions(false), 200)}
-                                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-[var(--border-color)] rounded-xl text-[var(--text-page)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 focus:border-[#FFDA8A] transition-all"
+                                    className={`w-full px-4 py-2.5 border border-[var(--border-color)] rounded-xl text-[var(--text-page)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFDA8A]/50 focus:border-[#FFDA8A] transition-all ${!isEditing ? 'bg-gray-50 dark:bg-slate-800/50 cursor-not-allowed opacity-75' : 'bg-white dark:bg-slate-900'}`}
                                     placeholder="Type city name..."
                                 />
-                                {showCitySuggestions && (
+                                {showCitySuggestions && isEditing && (
                                     <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
                                         {citySuggestions.length > 0 ? (
                                             citySuggestions.map((city, index) => (
@@ -413,14 +427,34 @@ const Profile = () => {
 
                         {/* Actions */}
                         <div className="flex items-center gap-4 pt-4 border-t border-[var(--border-color)]">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="px-6 py-2.5 bg-[#FFDA8A] hover:bg-[#ffc107] text-gray-900 font-semibold rounded-xl shadow-lg shadow-[#FFDA8A]/20 transition-all flex items-center gap-2"
-                            >
-                                {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                                Save Changes
-                            </button>
+                            {!isEditing ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(true)}
+                                    className="px-6 py-2.5 bg-[#FFDA8A] hover:bg-[#ffc107] text-gray-900 font-semibold rounded-xl shadow-lg shadow-[#FFDA8A]/20 transition-all flex items-center gap-2"
+                                >
+                                    <Edit2 size={18} />
+                                    Edit Profile
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setIsEditing(false); window.location.reload(); }} // Simple reset
+                                        className="px-6 py-2.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="px-6 py-2.5 bg-[#FFDA8A] hover:bg-[#ffc107] text-gray-900 font-semibold rounded-xl shadow-lg shadow-[#FFDA8A]/20 transition-all flex items-center gap-2"
+                                    >
+                                        {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                                        Save Changes
+                                    </button>
+                                </>
+                            )}
 
                             {successMsg && (
                                 <span className="text-green-600 dark:text-green-400 text-sm font-medium animate-in fade-in slide-in-from-left-2">

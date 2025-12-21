@@ -34,7 +34,9 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   profilePic: { type: String },
   role: { type: String, default: "user", enum: ["user", "organizer", "admin"] },
+  isBlocked: { type: Boolean, default: false }, // Block status
   walletBalance: { type: Number, default: 0 },
+  location: { type: String },
 
   // Organizer Specific Fields (KYC)
   organizationDetails: {

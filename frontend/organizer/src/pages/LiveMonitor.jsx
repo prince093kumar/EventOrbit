@@ -67,6 +67,7 @@ const LiveMonitor = () => {
             const newActivity = {
                 id: Date.now(), // Temp ID
                 time: booking.timestamp,
+                type: 'booking',
                 action: 'Ticket Sold',
                 user: booking.customerName || 'New Customer',
                 ticket: `#${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
@@ -85,7 +86,32 @@ const LiveMonitor = () => {
             }));
         });
 
+        socket.on('checkInAlert', (data) => {
+            console.log("Gate Alert Received:", data);
+
+            const newActivity = {
+                id: Date.now(),
+                time: data.timestamp,
+                type: 'checkin',
+                action: 'Gate Entry',
+                user: data.attendeeName || 'Guest',
+                ticket: data.ticketId,
+                eventName: data.eventTitle,
+                seatNumber: data.seatType, // Using seatType for display if seatNumber missing
+                alert: true // Highlight check-ins
+            };
+
+            setLiveFeed(prev => [newActivity, ...prev].slice(0, 20));
+
+            setStats(prev => ({
+                ...prev,
+                recentCheckIns: prev.recentCheckIns + 1
+            }));
+        });
+
         return () => {
+            socket.off('newBooking');
+            socket.off('checkInAlert');
             socket.disconnect();
         };
     }, []);
@@ -155,11 +181,11 @@ const LiveMonitor = () => {
                                         {formatTime(item.time)}
                                     </span>
                                     <div>
-                                        <p className={`text-sm font-medium ${item.alert ? 'text-red-500' : 'text-[var(--text-page)]'}`}>
-                                            {item.user} <span className="text-[var(--text-muted)] font-normal text-xs">bought</span> {item.eventName}
+                                        <p className={`text-sm font-medium ${item.alert ? 'text-green-600 dark:text-green-400' : 'text-[var(--text-page)]'}`}>
+                                            {item.user} <span className="text-[var(--text-muted)] font-normal text-xs">{item.type === 'checkin' ? 'checked in at' : 'bought'}</span> {item.eventName}
                                         </p>
                                         <p className="text-xs text-[var(--text-muted)]">
-                                            Seat: <span className="font-mono font-bold text-purple-500">{item.seatNumber || 'N/A'}</span> • <span className="font-mono">{item.ticket}</span>
+                                            {item.type === 'checkin' ? 'Type' : 'Seat'}: <span className="font-mono font-bold text-purple-500">{item.seatNumber || 'N/A'}</span> • <span className="font-mono">{item.ticket}</span>
                                         </p>
                                     </div>
                                 </div>

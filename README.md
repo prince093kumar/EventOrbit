@@ -1,196 +1,141 @@
-A scalable event management and ticket booking system built using the MERN Stack, featuring three fully isolated panels:
+# EventOrbit - Advanced Event Management System 🎟️
 
-👤 User Panel – Browse events, book tickets, manage wallet
+![MERN Stack](https://img.shields.io/badge/MERN-Stack-blue?style=for-the-badge&logo=react)
+![Socket.io](https://img.shields.io/badge/Socket.io-Realtime-black?style=for-the-badge&logo=socket.io)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
 
-🎤 Organizer Panel – Create/manage events, monitor seats, view analytics
+**EventOrbit** is a scalable, production-ready event management and ticket booking platform. It features a micro-frontend architecture with three isolated panels, ensuring robust security and role-based access control.
 
-🛡 Admin Panel – Oversee organizers, event approvals, payments & venues
+## 🚀 Key Features
 
-EventTix is designed with modular architecture, role‑based access control, and a clean folder structure suitable for production‑grade deployment.
+### 👤 User Panel
+*   **Event Discovery**: Browse and search for events with advanced filters.
+*   **Interactive Booking**: Visual seat selection map.
+*   **Digital Wallet**: Add funds, view transaction history, and pay securely.
+*   **Ticket Management**: QR code generation for easy check-ins.
+*   **Social**: Leave reviews and ratings.
 
-📑 Table of Contents
-Features
+### 🎤 Organizer Panel
+*   **Dashboard**: Real-time analytics and KPIs (Revenue, Attendees, Sales).
+*   **Event Management**: Create and edit events with rich details.
+*   **Real-Time Notifications**: Instant alerts for ticket sales, approvals, and payouts (Socket.io).
+*   **KYC & Profile**: Secure KYC submission (Documents, Bank Details) and profile management.
+*   **Live Monitor**: Track seat occupancy in real-time.
 
-Tech Stack
+### 🛡 Admin Panel
+*   **Governance**: Approve or reject organizer event listings.
+*   **User Management**: Oversee all users and organizers.
+*   **Financials**: Manage payouts and refunds.
+*   **Analytics**: Platform-wide performance metrics.
 
-System Architecture
+---
 
-Project Structure
+## 🛠 Tech Stack
 
-Installation
+| Area | Technology |
+| :--- | :--- |
+| **Frontend** | React (Vite), TailwindCSS, Lucide Icons, Axios |
+| **Backend** | Node.js, Express.js, Socket.io |
+| **Database** | MongoDB, Mongoose |
+| **Authentication** | JWT (JSON Web Tokens), bcrypt |
+| **Media** | Multer (File Uploads) |
 
-Environment Variables
+---
 
-Running the Project
+## 📂 Project Structure
 
-API Base URL
-
-Screenshots
-
-Future Enhancements
-
-Author
-
-✨ Features
-👤 User Panel
-Browse & search events
-
-View event details
-
-Seat selection with visual mapping
-
-Ticket booking + QR generation
-
-Wallet (add balance, transaction history)
-
-Manage profile
-
-View purchased tickets
-
-Leave reviews on events
-
-🎤 Organizer Panel
-Organizer login
-
-Dashboard with KPIs
-
-Create and manage events
-
-Live seat status updates
-
-Attendee list
-
-Revenue/booking reports
-
-🛡 Admin Panel
-User & Organizer management
-
-Organizer verification system
-
-Event approval workflow
-
-Payment & refund management
-
-Venue inventory management
-
-Admin analytics dashboard
-
-🧱 Tech Stack
-Frontend
-React (Vite)
-
-TailwindCSS
-
-React Router v6
-
-Axios
-
-Context API
-
-Backend
-Node.js + Express.js
-
-MongoDB + Mongoose
-
-JWT Authentication
-
-Multer (Media upload)
-
-bcrypt (Password hashing)
-
-🏗 System Architecture
-User → Frontend (React)
-        ↓ Axios
-Backend (Node + Express) → MongoDB
-        ↑ JWT Auth
-Organizer Panel (React)
-Admin Panel (React)
-Each panel is isolated for cleaner maintenance and deployment.
-
-📂 Project Structure
+```bash
 event-booking-system/
+├── backend/                # API Server & Socket.io
+│   ├── config/             # DB & Env Config
+│   ├── controllers/        # Logical Handlers
+│   ├── middleware/         # Auth & Error Middleware
+│   ├── routes/             # API Endpoints
+│   ├── models/             # Mongoose Schemas
+│   └── server.js           # Entry Point
 │
-├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── routes/
-│   ├── models/
-│   ├── utils/
-│   └── server.js
-│
-└── frontend/
-    ├── user/
-    ├── organizer/
-    └── admin/
+└── frontend/               # React Applications
+    ├── user/               # Customer Interface
+    ├── organizer/          # Event Manager Interface
+    └── admin/              # Super Admin Interface
+```
 
+---
 
+## ⚙️ Installation & Setup
 
-⚙️ Installation
-1️⃣ Clone Repository
+### 1. Prerequisite
+Ensure you have **Node.js** and **MongoDB** installed.
+
+### 2. Clone Repository
+```bash
 git clone https://github.com/paraspathania/EventOrbit.git
-cd event-booking-system
+cd EventOrbit
+```
 
-🔧 Backend Setup
+### 3. Backend Setup
+```bash
 cd backend
 npm install
-npm run dev
+# Create a .env file with your credentials (see below)
+npm start
+```
 
-🌐 Frontend Setup (for each panel)
-User Panel:
+### 4. Frontend Setup
+Run each panel in a separate terminal:
+
+**User Panel:**
+```bash
 cd frontend/user
 npm install
 npm run dev
+```
 
-Organizer Panel:
+**Organizer Panel:**
+```bash
 cd frontend/organizer
 npm install
 npm run dev
+```
 
-Admin Panel:
+**Admin Panel:**
+```bash
 cd frontend/admin
 npm install
 npm run dev
+```
 
-🔐 Environment Variables
-Create a .env file in /backend:
+---
 
+## 🔐 Environment Variables (`backend/.env`)
+
+Create a `.env` file in the `backend` directory:
+
+```env
 PORT=5000
-MONGO_URI=your_mongodb_connection
-JWT_SECRET=your_secret_key
-EMAIL_USER=optional_email_for_sending_notifications
-EMAIL_PASS=optional_email_password
-🔗 API Base URL
-Frontend should call:
+MONGO_URI=mongodb://localhost:27017/eventorbit
+JWT_SECRET=your_super_secret_key_change_this
+```
 
-http://localhost:5000/api
-🖼 Screenshots
-(Add real screenshots later)
+---
 
-Home Page
+## 🔗 API Reference
 
-Event Details
+The backend runs on `http://localhost:5000`.
+Key endpoints:
+*   `POST /api/auth/register` - Register User/Organizer
+*   `POST /api/auth/login` - Login
+*   `GET /api/events` - Fetch Events
+*   `POST /api/bookings` - Book Tickets
 
-Seat Selection
+---
 
-Booking Confirmation
+## � Future Roadmap
+- [ ] Integration with Razorpay/Stripe Payment Gateways.
+- [ ] Mobile App (React Native).
+- [ ] Advanced Seat Mapping Tool for Organizers.
+- [ ] Multi-language Support (i18n).
 
-Wallet
+---
 
-Organizer Dashboard
-
-Admin Panel
-
-🚀 Future Enhancements
-Realtime seat updates (Socket.io)
-
-Razorpay/Stripe payment gateway
-
-Push notifications + email alerts
-
-Organizer payout settlements
-
-Dark mode UI
-
-Multi‑language support
-
+**Author**: Paras Pathania
