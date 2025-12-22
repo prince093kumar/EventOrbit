@@ -48,8 +48,12 @@ app.use(express.json());
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow Postman, curl, server-to-server
       if (!origin) return callback(null, true);
+
+      // ✅ allow any vercel.app deployment
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
