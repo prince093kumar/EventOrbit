@@ -44,10 +44,27 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true // Important for cookies
-}));
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow Postman, curl, server-to-server
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.error("CORS blocked origin:", origin);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.options("*", cors()); // Enable pre-flight for all routes
 
 import session from "express-session";
 import cookieParser from "cookie-parser";
@@ -59,6 +76,8 @@ app.use(session({
   saveUninitialized: true,
   cookie: { maxAge: 10 * 60 * 1000 } // 10 minutes
 }));
+
+// Theme Preference Route
 
 // Theme Preference Route
 app.post('/api/theme', (req, res) => {
