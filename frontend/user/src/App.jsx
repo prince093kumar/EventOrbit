@@ -14,6 +14,7 @@ import Reviews from './pages/Reviews';
 // Auth Pages
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import TermsOfService from './pages/TermsOfService';
 
 // Placeholder Pages for now
 const EventDetails = () => <div className="p-8"><h1 className="text-2xl font-bold">Event Details</h1></div>;
@@ -78,6 +79,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/terms" element={<TermsOfService />} />
             <Route element={<Layout><Home /></Layout>} path="/" />
 
             {/* Protected Routes */}
