@@ -24,7 +24,8 @@ const Settings = () => {
     React.useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/admin/settings', {
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const response = await axios.get(`${API_URL}/api/admin/settings`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.data) {
@@ -40,7 +41,8 @@ const Settings = () => {
     const handleSave = async () => {
         setLoading(true);
         try {
-            const response = await axios.put('http://localhost:5000/api/admin/settings', settings, {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const response = await axios.put(`${API_URL}/api/admin/settings`, settings, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.data.success) {

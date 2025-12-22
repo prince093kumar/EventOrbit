@@ -58,7 +58,9 @@ function App() {
             try {
                 // Try to fetch public events (or any protected route if needed, but public is safer to check availability)
                 // Using /api/events as a probe
-                await axios.get('http://localhost:5000/api/events');
+                // Using /api/events as a probe
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                await axios.get(`${API_URL}/api/events`);
                 setIsMaintenance(false);
             } catch (error) {
                 if (error.response && error.response.status === 503) {

@@ -51,7 +51,8 @@ const Navbar = () => {
         /*
         const fetchAdminProfile = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/admin/profile');
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const response = await axios.get(`${API_URL}/api/admin/profile`);
                 if (response.data) {
                     setAdminInfo(response.data);
                 }

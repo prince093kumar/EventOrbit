@@ -55,7 +55,9 @@ function App() {
     const checkStatus = async () => {
       try {
         // Try to fetch public events to check system status
-        await axios.get('http://localhost:5000/api/events');
+        // Try to fetch public events to check system status
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        await axios.get(`${API_URL}/api/events`);
         setIsMaintenance(false);
       } catch (error) {
         if (error.response && error.response.status === 503) {
