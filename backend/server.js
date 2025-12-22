@@ -13,6 +13,7 @@ import adminRoutes from "./routes/admin_routes.js";
 
 const app = express();
 import http from "http";
+import { Server } from "socket.io";
 
 const httpServer = http.createServer(app); // Wrap express app
 
