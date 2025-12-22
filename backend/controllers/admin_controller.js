@@ -3,6 +3,7 @@ import User from "../models/user_model.js";
 import Event from "../models/event_model.js";
 import Booking from "../models/booking_model.js";
 import Review from "../models/review_model.js";
+import Settings from "../models/settings_model.js";
 
 // @desc    Get Admin Dashboard Stats
 // @route   GET /api/admin/stats
@@ -225,3 +226,41 @@ export const deleteReview = async (req, res) => {
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
+
+// @desc    Get System Settings
+// @route   GET /api/admin/settings
+// @access  Private/Admin
+export const getSettings = async (req, res) => {
+    try {
+        const settings = await Settings.getSettings();
+        res.json(settings);
+    } catch (error) {
+        console.error("Error fetching settings:", error);
+        res.status(500).json({ message: "Server Error" });
+    }
+};
+
+// @desc    Update System Settings
+// @route   PUT /api/admin/settings
+// @access  Private/Admin
+export const updateSettings = async (req, res) => {
+    try {
+        const settings = await Settings.getSettings();
+        const { siteName, supportEmail, timezone, emailAlerts, pushNotifications, maintenanceMode } = req.body;
+
+        settings.siteName = siteName ?? settings.siteName;
+        settings.supportEmail = supportEmail ?? settings.supportEmail;
+        settings.timezone = timezone ?? settings.timezone;
+        settings.emailAlerts = emailAlerts ?? settings.emailAlerts;
+        settings.pushNotifications = pushNotifications ?? settings.pushNotifications;
+        settings.maintenanceMode = maintenanceMode ?? settings.maintenanceMode;
+
+        await settings.save();
+        res.json({ success: true, settings, message: "Settings updated successfully" });
+    } catch (error) {
+        console.error("Error updating settings:", error);
+        res.status(500).json({ message: "Server Error" });
+    }
+};
+
+

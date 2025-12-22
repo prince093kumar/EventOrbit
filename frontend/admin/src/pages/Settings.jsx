@@ -3,19 +3,56 @@ import axios from 'axios';
 import { Settings as SettingsIcon, Bell, Globe, Shield, Save, Monitor } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
+import { useAuth } from '../context/AuthContext';
+
 const Settings = () => {
+    const { token } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const [activeTab, setActiveTab] = useState('general');
 
     // Mock State for Settings
     const [settings, setSettings] = useState({
-        siteName: 'EventOrbit Admin',
-        supportEmail: 'support@eventorbit.com',
+        siteName: '',
+        supportEmail: '',
         timezone: 'UTC-5 (Eastern Time)',
         emailAlerts: true,
         pushNotifications: false,
         maintenanceMode: false
     });
+    const [loading, setLoading] = useState(false);
+
+    React.useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/admin/settings', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (response.data) {
+                    setSettings(response.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch settings", error);
+            }
+        };
+        if (token) fetchSettings();
+    }, [token]);
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.put('http://localhost:5000/api/admin/settings', settings, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data.success) {
+                alert("Settings saved successfully!");
+            }
+        } catch (error) {
+            console.error("Error saving settings:", error);
+            alert("Failed to save settings");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleToggle = (key) => {
         setSettings(prev => ({ ...prev, [key]: !prev[key] }));
@@ -160,26 +197,6 @@ const Settings = () => {
                                         </button>
                                     </div>
 
-                                    <div className="border-t border-red-200 dark:border-red-900/30 pt-4">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="font-medium text-red-700 dark:text-red-400">Clear Database</p>
-                                                <p className="text-xs text-red-600/80 dark:text-red-400/70">Permanently delete all Users, Events, and Bookings.</p>
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    if (window.confirm("ARE YOU SURE? This will delete ALL data (Users, Events, Bookings) permanently. This action cannot be undone.")) {
-                                                        axios.delete('http://localhost:5000/api/admin/clear-database')
-                                                            .then(() => alert("Database cleared successfully!"))
-                                                            .catch(err => alert("Failed to clear database: " + err.message));
-                                                    }
-                                                }}
-                                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors"
-                                            >
-                                                Delete All Data
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -201,9 +218,13 @@ const Settings = () => {
                         )}
 
                         <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700 flex justify-end">
-                            <button className="flex items-center px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
+                            <button
+                                onClick={handleSave}
+                                disabled={loading}
+                                className="flex items-center px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                            >
                                 <Save className="w-4 h-4 mr-2" />
-                                Save Changes
+                                {loading ? 'Saving...' : 'Save Changes'}
                             </button>
                         </div>
                     </div>

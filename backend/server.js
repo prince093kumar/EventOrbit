@@ -66,6 +66,12 @@ app.use((req, res, next) => {
 });
 
 // Routes
+import { checkMaintenance } from "./middleware/maintenance_middleware.js";
+
+// Apply maintenance check to all API routes
+// The middleware internally skips admin routes
+app.use("/api", checkMaintenance);
+
 app.use("/api/events", eventRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/organizer", organizerRoutes);

@@ -11,7 +11,9 @@ import {
     verifyOrganizer,
     toggleUserBlock,
     getAllReviews,
-    deleteReview
+    deleteReview,
+    getSettings,
+    updateSettings
 } from "../controllers/admin_controller.js";
 import { protect } from "../middleware/auth_middleware.js";
 
@@ -33,5 +35,9 @@ router.put("/organizers/:id/kyc", protect, verifyOrganizer);
 // Review Management
 router.get("/reviews", protect, getAllReviews);
 router.delete("/reviews/:id", protect, deleteReview);
+
+// System Settings
+router.get("/settings", protect, getSettings);
+router.put("/settings", protect, updateSettings);
 
 export default router;
