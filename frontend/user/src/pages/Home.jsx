@@ -46,6 +46,7 @@ const Home = () => {
 
         setEvents(eventsData);
         if (categories.length === 0) setCategories(categoriesData);
+      } catch (error) {
         console.error("Failed to load events", error);
       } finally {
         setLoading(false);
