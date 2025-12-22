@@ -123,14 +123,6 @@ const SignIn = () => {
                     </button>
 
                     <div className="mt-6 text-center">
-                        <div className="mb-4">
-                            <p className="text-sm text-[var(--text-muted)]">
-                                Don't have an account?{' '}
-                                <Link to="/signup" className="font-semibold text-blue-600 hover:underline">
-                                    Create an Account
-                                </Link>
-                            </p>
-                        </div>
                         <p className="text-xs text-[var(--text-muted)]">
                             EventOrbit Admin Panel &copy; 2024
                         </p>
