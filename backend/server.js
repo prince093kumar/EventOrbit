@@ -64,7 +64,7 @@ app.use(
   })
 );
 
-app.options("*", cors()); // Enable pre-flight for all routes
+app.options(/.* /, cors()); // Enable pre-flight for all routes (RegExp to avoid path-to-regexp error)
 
 import session from "express-session";
 import cookieParser from "cookie-parser";
