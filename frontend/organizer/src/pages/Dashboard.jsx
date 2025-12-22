@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import apiClient from '../api/apiClient';
 import { TrendingUp, Calendar, DollarSign, Clock, Ticket } from 'lucide-react';
 import EventCard from '../components/EventCard';
 
@@ -44,25 +45,16 @@ const Dashboard = () => {
 
             try {
                 // Fetch Stats
-                const statsRes = await fetch('http://localhost:5000/api/organizer/stats', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const statsData = await statsRes.json();
-                if (statsData.success) setStats(statsData);
+                const statsRes = await apiClient.get('/organizer/stats');
+                if (statsRes.data.success) setStats(statsRes.data);
 
                 // Fetch Recent Activity
-                const activityRes = await fetch('http://localhost:5000/api/organizer/live-activity', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const activityData = await activityRes.json();
-                if (activityData.success) setActivities(activityData.activities);
+                const activityRes = await apiClient.get('/organizer/live-activity');
+                if (activityRes.data.success) setActivities(activityRes.data.activities);
 
-                // Fetch My Events (NEW)
-                const eventsRes = await fetch('http://localhost:5000/api/organizer/events', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const eventsData = await eventsRes.json();
-                if (eventsData.success) setEvents(eventsData.events);
+                // Fetch My Events
+                const eventsRes = await apiClient.get('/organizer/events');
+                if (eventsRes.data.success) setEvents(eventsRes.data.events);
 
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);

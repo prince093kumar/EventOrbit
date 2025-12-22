@@ -12,23 +12,23 @@ import bookingRoutes from "./routes/booking_routes.js";
 import adminRoutes from "./routes/admin_routes.js";
 
 const app = express();
-import { createServer } from "http"; // Import createServer
-import { Server } from "socket.io"; // Import socket.io
+import http from "http";
 
-const httpServer = createServer(app); // Wrap express app
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-  process.env.ADMIN_URL, // Admin
-  process.env.ORGANIZER_URL, // Organizer
-  process.env.USER_URL // User
-].filter(Boolean); // Remove undefined values
+const httpServer = http.createServer(app); // Wrap express app
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"]
+    origin: [
+      process.env.ADMIN_URL,
+      process.env.ORGANIZER_URL,
+      process.env.USER_URL,
+      "https://event-orbit-organizer.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
   }
 });
 
