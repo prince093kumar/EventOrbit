@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Users, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import apiClient from '../api/apiClient';
 
 const MonitorCard = ({ title, value, subtext, icon: Icon, color }) => (
     <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-5 rounded-2xl flex items-center justify-between">
@@ -29,12 +30,8 @@ const LiveMonitor = () => {
         // Fetch Initial Data
         const fetchActivity = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/organizer/live-activity', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('eventorbit_organizer_token')}`
-                    }
-                });
-                const data = await res.json();
+                const res = await apiClient.get('/organizer/live-activity');
+                const data = res.data;
                 if (data.success) {
                     setLiveFeed(data.activities);
                     setStats(prev => ({
@@ -54,7 +51,11 @@ const LiveMonitor = () => {
         fetchActivity();
 
         // WebSocket Connection
-        const socket = io('http://localhost:5000');
+        const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const socket = io(SOCKET_URL, {
+            withCredentials: true,
+            transports: ["websocket", "polling"],
+        });
 
         socket.on('connect', () => {
             console.log("Connected to WebSocket");
