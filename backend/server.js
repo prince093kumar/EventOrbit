@@ -82,6 +82,11 @@ app.use(session({
   cookie: { maxAge: 10 * 60 * 1000 } // 10 minutes
 }));
 
+// Health Check Endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Theme Preference Route
 
 // Theme Preference Route
