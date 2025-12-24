@@ -32,7 +32,7 @@ const GateKeeper = () => {
         setErrorMsg('');
 
         try {
-            const res = await apiClient.post('http://localhost:5000/api/bookings/verify', { ticketId: idToVerify });
+            const res = await apiClient.post('/bookings/verify', { ticketId: idToVerify });
 
             if (res.data.success) {
                 setStatus('success');

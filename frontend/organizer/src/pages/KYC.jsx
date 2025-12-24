@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Building, ShieldCheck, Upload, CheckCircle, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import apiClient from '../api/apiClient';
 
 const KYC = () => {
     const { user } = useAuth();
@@ -23,10 +24,8 @@ const KYC = () => {
                 // Try backend first
                 const token = localStorage.getItem('eventorbit_organizer_token');
                 if (token) {
-                    const res = await fetch('http://localhost:5000/api/organizer/profile', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const data = await res.json();
+                    const res = await apiClient.get('/organizer/profile');
+                    const data = res.data;
                     if (data.success && data.user) {
                         setFormData(prev => ({
                             ...prev,
@@ -84,16 +83,13 @@ const KYC = () => {
                     data.append('kycStatus', formData.kycStatus);
                 }
 
-                const res = await fetch('http://localhost:5000/api/organizer/profile', {
-                    method: 'PUT',
+                const res = await apiClient.put('/organizer/profile', data, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                        // Browser will automatically set multipart/form-data with boundary
-                    },
-                    body: data
+                        'Content-Type': 'multipart/form-data'
+                    }
                 });
 
-                const resData = await res.json();
+                const resData = res.data;
                 if (resData.success) {
                     setFormData(prev => ({
                         ...prev,

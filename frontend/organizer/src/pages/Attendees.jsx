@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Download, MoreVertical, CheckCircle, Clock, XCircle } from 'lucide-react';
+import apiClient from '../api/apiClient';
 
 const Attendees = () => {
     // State for attendees and filters
@@ -14,12 +15,8 @@ const Attendees = () => {
 
     const fetchAttendees = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/organizer/attendees', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('eventorbit_organizer_token')}`
-                }
-            });
-            const data = await res.json();
+            const res = await apiClient.get('/organizer/attendees');
+            const data = res.data;
             if (data.success) {
                 setAttendees(data.attendees);
             }
@@ -36,15 +33,8 @@ const Attendees = () => {
 
     const updateStatus = async (id, status, reason = "") => {
         try {
-            const res = await fetch(`http://localhost:5000/api/organizer/booking/${id}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('eventorbit_organizer_token')}`
-                },
-                body: JSON.stringify({ status, reason })
-            });
-            const data = await res.json();
+            const res = await apiClient.put(`/organizer/booking/${id}/status`, { status, reason });
+            const data = res.data;
             if (data.success) {
                 // Refresh list
                 fetchAttendees();

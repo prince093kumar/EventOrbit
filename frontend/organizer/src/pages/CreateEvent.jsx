@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, Ticket, ChevronDown, Check } from 'lucide-react';
+import apiClient from '../api/apiClient';
 
 const CreateEvent = () => {
     // Mock Venue Data for "Venue-Driven Ticket System"
@@ -100,15 +101,13 @@ const CreateEvent = () => {
                 return;
             }
 
-            const response = await fetch('http://localhost:5000/api/events', {
-                method: 'POST',
+            const response = await apiClient.post('/events', formData, {
                 headers: {
-                    'Authorization': `Bearer ${token}` // No Content-Type (browser sets it)
-                },
-                body: formData
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
-            const data = await response.json();
+            const data = response.data;
 
             if (data.success) {
                 alert("Event Created Successfully! Check Dashboard.");

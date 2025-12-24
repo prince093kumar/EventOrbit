@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, CreditCard, Download, Clock } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import apiClient from '../api/apiClient';
 
 const Revenue = () => {
     const [stats, setStats] = useState({
@@ -14,12 +15,8 @@ const Revenue = () => {
     useEffect(() => {
         const fetchRevenue = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/organizer/revenue', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('eventorbit_organizer_token')}`
-                    }
-                });
-                const data = await res.json();
+                const res = await apiClient.get('/organizer/revenue');
+                const data = res.data;
                 if (data.success) {
                     setStats(data);
                 }
